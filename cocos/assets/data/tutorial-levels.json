@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 2,
+  "levels": [
+    {"id":"IST-01","name":"İlk Hat","stations":["yenikapi","taksim"],"budgetM":32,"primary":{"type":"connect","from":"yenikapi","to":"taksim"},"rewardCoin":50},
+    {"id":"IST-02","name":"Hattı Uzat","stations":["yenikapi","taksim","mecidiyekoy"],"budgetM":34,"primary":{"type":"singleLineStops","value":3},"rewardCoin":65},
+    {"id":"IST-03","name":"İlk Sefer","stations":["yenikapi","taksim","mecidiyekoy","gayrettepe"],"budgetM":42,"primary":{"type":"deliveredAndTrain","passengers":80,"trains":1},"rewardCoin":80},
+    {"id":"IST-04","name":"Boğazı Geç","stations":["yenikapi","taksim","mecidiyekoy","uskudar"],"budgetM":64,"primary":{"type":"connectContinents"},"bonus":{"maxTunnel":1},"rewardCoin":95},
+    {"id":"IST-05","name":"İlk Aktarma","stations":["yenikapi","taksim","mecidiyekoy","uskudar","altunizade"],"budgetM":54,"primary":{"type":"transferAndDelivered","passengers":120},"bonus":{"satisfactionMin":75},"rewardCoin":130,"rewardSkillPoint":1}
+  ]
+}
