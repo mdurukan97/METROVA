@@ -25,7 +25,7 @@ if (names.size !== 39) {
   throw new Error(`Expected 39 Istanbul districts, received ${names.size}. Refusing silent map corruption.`);
 }
 
-const out = path.resolve('assets/data/istanbul-districts.geojson');
+const out = path.resolve('assets/data/istanbul-district-geometry.json');
 await mkdir(path.dirname(out), { recursive: true });
 await writeFile(out, JSON.stringify(geojson));
 console.log(`Wrote ${geojson.features.length} official district polygons to ${out}`);
