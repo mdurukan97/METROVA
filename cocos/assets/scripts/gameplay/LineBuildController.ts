@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventTouch, Graphics, JsonAsset, Node, resources, UITransform, Vec2 } from 'cc';
+import { _decorator, Color, Component, EventTouch, Graphics, JsonAsset, Node, resources, UITransform, Vec2, Vec3 } from 'cc';
 import { GeoProjector } from '../map/GeoProjector';
 import { GeoMath } from './GeoMath';
 import { BosphorusRule } from './BosphorusRule';
@@ -118,7 +118,7 @@ export class LineBuildController extends Component {
   }
 
   private project(s:StationAnchor,size:any){return this.projector.project(s.lat,s.lon,size);}
-  private toLocal(ui:Vec2){return this.getComponent(UITransform)!.convertToNodeSpaceAR(new (require('cc').Vec3)(ui.x,ui.y,0)) as any as Vec2;}
+  private toLocal(ui:Vec2){const p=this.getComponent(UITransform)!.convertToNodeSpaceAR(new Vec3(ui.x,ui.y,0)); return new Vec2(p.x,p.y);}
 
   private dashed(g:Graphics,a:Vec2,b:Vec2,dash:number,gap:number){
     const d=Vec2.distance(a,b), dir=b.clone().subtract(a).normalize();
