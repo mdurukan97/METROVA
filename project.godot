@@ -22,3 +22,5 @@ ui_cancel={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":4194305,"unicode":0)]
 }
+
+; CI build trigger
