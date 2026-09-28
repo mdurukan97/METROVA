@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-09-28",
+  "lines": {
+    "M2": {
+      "name": "Yenikapı-Seyrantepe-Hacıosman",
+      "stations": ["Yenikapı","Vezneciler-İstanbul Ü.","Haliç","Şişhane","Taksim","Osmanbey","Şişli-Mecidiyeköy","Gayrettepe","Levent","4.Levent","Sanayi Mahallesi","Seyrantepe","İTÜ-Ayazağa","Atatürk Oto Sanayi","Darüşşafaka","Hacıosman"]
+    },
+    "M4": {
+      "name": "Kadıköy-Sabiha Gökçen Havalimanı",
+      "stations": ["Kadıköy","Ayrılık Çeşmesi","Acıbadem","Ünalan","Göztepe","Yenisahra","Kozyatağı","Bostancı","Küçükyalı","Maltepe","Huzurevi","Gülsuyu","Esenkent","Hastane-Adliye","Soğanlık","Kartal","Yakacık-Adnan Kahveci","Pendik","Tavşantepe","Fevzi Çakmak-Hastane","Yayalar-Şeyhli","Kurtköy","Sabiha Gökçen Havalimanı"]
+    },
+    "M5": {
+      "name": "Üsküdar-Sultanbeyli",
+      "stations": ["Üsküdar","Fıstıkağacı","Bağlarbaşı","Altunizade","Kısıklı","Bulgurlu","Ümraniye","Çarşı","Yamanevler","Çakmak","Ihlamurkuyu","Altınşehir","İmam Hatip Lisesi","Dudullu","Necip Fazıl","Çekmeköy","Meclis","Sarıgazi","Sancaktepe Şehir Hastanesi","Sancaktepe","Samandıra Merkez","Veysel Karani","Hasanpaşa","Sultanbeyli"]
+    }
+  }
+}
