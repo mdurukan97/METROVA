@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "districtGeometry": {
+    "publisher": "İstanbul Büyükşehir Belediyesi - Kültür Envanteri",
+    "service": "IlceMahalle/MapServer/0",
+    "type": "ArcGIS Feature Layer",
+    "supports": ["geoJSON", "JSON", "PBF"],
+    "sourceUrl": "https://kulturenvanteri.ibb.gov.tr/server/rest/services/IlceMahalle/MapServer/0",
+    "queryUrl": "https://kulturenvanteri.ibb.gov.tr/server/rest/services/IlceMahalle/MapServer/0/query",
+    "targetSpatialReference": 4326
+  },
+  "railNetwork": {
+    "publisher": "Metro İstanbul",
+    "officialLines": {
+      "M2": "https://www.metro.istanbul/Hatlarimiz/HatDetay?hat=M2",
+      "M4": "https://www.metro.istanbul/Hatlarimiz/HatDetay?hat=M4",
+      "M5": "https://www.metro.istanbul/Hatlarimiz/HatDetay?hat=M5"
+    }
+  },
+  "policy": {
+    "geographicAnchors": "never screen-space fake",
+    "labelOffsets": "allowed",
+    "polygonSimplification": "allowed only for rendering performance; topology and coastline silhouette must remain recognizable",
+    "runtimeNetworkDependency": false
+  }
+}
