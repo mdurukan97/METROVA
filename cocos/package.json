@@ -1,0 +1,14 @@
+{
+  "name": "metrova",
+  "version": "0.2.0",
+  "private": true,
+  "description": "METROVA - Istanbul atlas transit management game",
+  "creator": {"version": "3.8.8"},
+  "devDependencies": {
+    "@cocos/creator-types": "3.8.8",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "atlas:fetch": "node tools/fetch-istanbul-atlas.mjs"
+  }
+}
