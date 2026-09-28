@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "strict": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "types": ["@cocos/creator-types/engine"],
+    "moduleResolution": "node"
+  },
+  "exclude": ["build", "library", "local", "temp"]
+}
