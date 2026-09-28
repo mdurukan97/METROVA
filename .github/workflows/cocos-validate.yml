@@ -1,0 +1,37 @@
+name: Validate Cocos Rewrite
+
+on:
+  push:
+    branches: [ cocos-rewrite ]
+    paths:
+      - 'cocos/**'
+      - '.github/workflows/cocos-validate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cocos
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cocos/package.json
+      - name: Install tooling
+        run: npm install
+      - name: Fetch official Istanbul district geometry
+        run: npm run atlas:fetch
+      - name: Type-check TypeScript
+        run: npx tsc --noEmit
+      - name: Verify atlas integrity
+        run: |
+          node -e "const fs=require('fs');const g=JSON.parse(fs.readFileSync('assets/data/istanbul-district-geometry.json','utf8')); if(g.features.length!==39) throw new Error('District count '+g.features.length); console.log('District polygons:',g.features.length)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: istanbul-official-atlas
+          path: cocos/assets/data/istanbul-district-geometry.json
+          retention-days: 14
