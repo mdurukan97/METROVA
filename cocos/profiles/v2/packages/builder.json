@@ -1,0 +1,27 @@
+{
+  "__version__": "1.3.5",
+  "log": { "level": 4 },
+  "common": {
+    "outputName": "metrova",
+    "platform": "web-mobile",
+    "buildPath": "project://build",
+    "debug": true,
+    "md5Cache": false,
+    "sourceMaps": true,
+    "mainBundleCompressionType": "merge_dep",
+    "mainBundleIsRemote": false,
+    "mergeStartScene": false,
+    "experimentalEraseModules": false,
+    "packAutoAtlas": true,
+    "startScene": "a1b2c3d4-e5f6-47a8-9123-456789abcdef",
+    "scenes": [
+      {
+        "url": "db://assets/scenes/Main.scene",
+        "uuid": "a1b2c3d4-e5f6-47a8-9123-456789abcdef",
+        "inBundle": false
+      }
+    ],
+    "outputName": "metrova",
+    "useSplashScreen": false
+  }
+}
