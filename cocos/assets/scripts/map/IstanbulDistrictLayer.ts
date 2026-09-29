@@ -1,5 +1,6 @@
 import { _decorator, Color, Component, Graphics, JsonAsset, resources, UITransform } from 'cc';
 import { GeoProjector, GeoBounds } from './GeoProjector';
+import { ISTANBUL_GAMEPLAY_BOUNDS } from './MapProjectionConfig';
 const { ccclass, property } = _decorator;
 
 type Polygon = number[][][];
@@ -16,9 +17,7 @@ export class IstanbulDistrictLayer extends Component {
   drawBorders = true;
 
   private graphics!: Graphics;
-  private projector = new GeoProjector({
-    west:27.95, east:30.02, south:40.74, north:41.62
-  } as GeoBounds);
+  private projector = new GeoProjector(ISTANBUL_GAMEPLAY_BOUNDS);
 
   start() {
     this.graphics = this.getComponent(Graphics) ?? this.addComponent(Graphics);
