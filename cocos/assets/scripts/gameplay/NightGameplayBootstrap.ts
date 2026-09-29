@@ -9,6 +9,7 @@ import { MapCameraController } from '../map/MapCameraController';
 import { LineBuildController } from './LineBuildController';
 import { StationDemandLayer } from './StationDemandLayer';
 import { TrainVisualLayer } from './TrainVisualLayer';
+import { NightHudBuilder } from './NightHudBuilder';
 const { ccclass } = _decorator;
 
 @ccclass('NightGameplayBootstrap')
@@ -48,6 +49,13 @@ export class NightGameplayBootstrap extends Component {
     camera.maxZoom=4;
     camera.panLimitX=980;
     camera.panLimitY=540;
+
+    const hudNode=new Node('HUD');
+    const hudUi=hudNode.addComponent(UITransform)!;
+    hudUi.setContentSize(rootUi.contentSize.width,rootUi.contentSize.height);
+    this.node.addChild(hudNode);
+    const hud=hudNode.addComponent(NightHudBuilder)!;
+    hud.builder=builder;
   }
 
   private layer<T extends Component>(parent:Node,name:string,type:new()=>T):T{
