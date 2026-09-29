@@ -7,7 +7,7 @@ export class MainMenuController extends Component {
   private cards:Node[]=[];
 
   start(){
-    const rootUi=this.getComponent(UITransform)??this.addComponent(UITransform);
+    const rootUi=((this.getComponent(UITransform) ?? this.addComponent(UITransform))!)!;
     if(rootUi.contentSize.width<100)rootUi.setContentSize(1280,720);
 
     const bg=this.fullNode('AnimatedNetwork');
