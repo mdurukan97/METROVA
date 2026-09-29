@@ -27,16 +27,16 @@ export class NightHudBuilder extends Component {
     const controls=this.panel('Controls',574,326,120,62,'',12);
     const pause=this.button(controls,'Pause',-36,0,38,38,'Ⅱ');
     this.pauseLabel=pause.node.getChildByName('Label')!.getComponent(Label)!;
-    pause.node.on(Button.EventType.CLICK,()=>this.builder?.togglePause());
+    pause.node.on(Node.EventType.CLICK,()=>this.builder?.togglePause());
     ([1,2,3] as const).forEach((s,i)=>{
       const b=this.button(controls,'Speed'+s,-2+i*30,0,26,38,s+'×');
-      b.node.on(Button.EventType.CLICK,()=>this.builder?.setSpeed(s));
+      b.node.on(Node.EventType.CLICK,()=>this.builder?.setSpeed(s));
     });
 
     this.undoNode=this.panel('Undo',-565,245,128,46,'',12);
     const undoButton=this.button(this.undoNode,'UndoButton',0,0,116,36,'GERİ AL');
     this.undoLabel=undoButton.node.getChildByName('Label')!.getComponent(Label)!;
-    undoButton.node.on(Button.EventType.CLICK,()=>this.builder?.undo());
+    undoButton.node.on(Node.EventType.CLICK,()=>this.builder?.undo());
     this.undoNode.active=false;
 
     this.preview=this.panel('BuildPreview',-475,-285,260,58,'',12);
@@ -51,7 +51,7 @@ export class NightHudBuilder extends Component {
     this.contextTitle=this.label(this.context,'Hat',-315,14,220,28,'HAT',18,new Color('#FFFFFF'));
     this.contextDetail=this.label(this.context,'Detail',-315,-18,440,24,'',13,new Color('#AFC4D4'));
     const train=this.button(this.context,'Train',260,0,150,54,'TREN EKLE');
-    train.node.on(Button.EventType.CLICK,()=>this.builder?.addTrain()); this.context.active=false;
+    train.node.on(Node.EventType.CLICK,()=>this.builder?.addTrain()); this.context.active=false;
 
     this.resultPanel=this.panel('Result',0,0,430,230,'',18);
     this.resultTitle=this.label(this.resultPanel,'ResultTitle',-185,58,370,48,'BÖLÜM TAMAMLANDI',26,new Color('#FFFFFF'));
