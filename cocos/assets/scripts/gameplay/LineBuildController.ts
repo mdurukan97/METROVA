@@ -93,6 +93,8 @@ export class LineBuildController extends Component {
     this.activeStationIds=ids.filter(id=>this.stations.has(id));
   }
 
+  isBuildingLine(){return this.dragFrom!==null;}
+
   getMetrics(){
     return this.metrics?.snapshot() ?? null;
   }
