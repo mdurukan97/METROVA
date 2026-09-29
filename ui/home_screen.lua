@@ -6,21 +6,63 @@ local C = theme.colors
 
 local function add_city_lights(ctx)
     math.randomseed(29092026)
-    for i = 1, 130 do
-        local x = math.random(180, 1580)
-        local y = math.random(90, 745)
+
+    -- Dense lower-city glow instead of a star-field spread across the whole screen.
+    for i = 1, 210 do
+        local x = math.random(190, 1580)
+        local y = math.random(225, 500)
         local s = math.random(2, 5)
-        local col = (i % 5 == 0) and C.city_light_cool or C.city_light
+        local col = (i % 6 == 0) and C.city_light_cool or C.city_light
         ui.box(ctx, x, y, s, s, col)
+    end
+
+    -- A restrained skyline silhouette.
+    local x = 690
+    while x < 1580 do
+        local w = math.random(18, 42)
+        local h = math.random(45, 170)
+        ui.box(ctx, x, 310 + h * 0.5, w, h, vmath.vector4(0.018, 0.055, 0.09, 0.96))
+        if h > 115 then
+            ui.box(ctx, x, 310 + h + 18, 3, 36, vmath.vector4(0.12, 0.28, 0.42, 0.8))
+        end
+        x = x + w + math.random(7, 18)
     end
 end
 
 local function add_bridge(ctx)
-    local a = vmath.vector3(850, 290, 0)
-    local b = vmath.vector3(1450, 370, 0)
-    ui.neon_line(ctx, a, b, 5, C.red, vmath.vector4(1, 0.08, 0.12, 0.18))
-    for x = 930, 1380, 150 do
-        ui.line(ctx, vmath.vector3(x, 300 + (x - 850) * 0.133, 0), vmath.vector3(x, 520, 0), 3, vmath.vector4(1, 0.18, 0.20, 0.65))
+    -- Water foreground.
+    ui.box(ctx, 1115, 215, 930, 250, vmath.vector4(0.018, 0.095, 0.16, 0.82))
+
+    -- Main illuminated bridge deck, built as a segmented curve.
+    local pts = {
+        vmath.vector3(765, 330, 0),
+        vmath.vector3(855, 342, 0),
+        vmath.vector3(955, 352, 0),
+        vmath.vector3(1065, 360, 0),
+        vmath.vector3(1180, 366, 0),
+        vmath.vector3(1300, 369, 0),
+        vmath.vector3(1435, 365, 0),
+        vmath.vector3(1545, 354, 0),
+    }
+    for i = 1, #pts - 1 do
+        ui.neon_line(ctx, pts[i], pts[i + 1], 4.2, C.red, vmath.vector4(1, 0.08, 0.12, 0.16))
+    end
+
+    local towers = {
+        { x = 930, deck = 350, top = 570 },
+        { x = 1355, deck = 368, top = 570 },
+    }
+    for _, tower in ipairs(towers) do
+        ui.neon_line(ctx, vmath.vector3(tower.x, tower.deck, 0), vmath.vector3(tower.x, tower.top, 0), 4, C.red, vmath.vector4(1, 0.08, 0.12, 0.12))
+        ui.neon_line(ctx, vmath.vector3(tower.x + 22, tower.deck, 0), vmath.vector3(tower.x + 22, tower.top, 0), 4, C.red, vmath.vector4(1, 0.08, 0.12, 0.12))
+    end
+
+    -- Suspension cables.
+    local cable = vmath.vector4(1, 0.24, 0.27, 0.62)
+    for _, px in ipairs({800, 850, 1015, 1080, 1160, 1240, 1420, 1490}) do
+        local target_y = 340 + math.abs(px - 1140) * 0.022
+        local topx = px < 1140 and 941 or 1366
+        ui.line(ctx, vmath.vector3(topx, 560, 0), vmath.vector3(px, target_y, 0), 1.6, cable)
     end
 end
 
