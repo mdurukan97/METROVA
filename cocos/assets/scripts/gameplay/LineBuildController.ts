@@ -182,6 +182,10 @@ export class LineBuildController extends Component {
     };
   }
 
+  getNetworkModel(){return this.model;}
+
+  setBudget(value:number){if(this.model)this.model.budgetM=value;}
+
   getMetrics(){
     return this.metrics?.snapshot() ?? null;
   }
