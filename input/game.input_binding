@@ -7,6 +7,6 @@ touch_trigger {
   action: "touch"
 }
 key_trigger {
-  input: KEY_ESCAPE
+  input: KEY_ESC
   action: "back"
 }
