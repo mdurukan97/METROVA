@@ -97,12 +97,6 @@ jobs:
           node workflow/download-tools.js --minimal
           npm run build
 
-      - name: Import Cocos project
-        shell: pwsh
-        run: |
-          $cli="$env:RUNNER_TEMP/cocos-cli/dist/cli.js"
-          node $cli --no-interactive import --project "$env:GITHUB_WORKSPACE/cocos"
-
       - name: Build Android native project
         shell: pwsh
         run: |
