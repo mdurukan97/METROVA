@@ -27,6 +27,44 @@ local LABEL_OFFSETS = {
     sabiha = { dx = -18, dy = 18, pivot = gui.PIVOT_E },
 }
 
+local function clamp(v, lo, hi)
+    return math.max(lo, math.min(hi, v))
+end
+
+local function apply_camera(ctx)
+    if not ctx.map_root or not ctx.camera then return end
+    ui.set_position(ctx.map_root, vmath.vector3(
+        800 + ctx.camera.pan_x,
+        450 + ctx.camera.pan_y,
+        0
+    ))
+    gui.set_scale(ctx.map_root, vmath.vector3(ctx.camera.zoom, ctx.camera.zoom, 1))
+    if ctx.zoom_text then
+        gui.set_text(ctx.zoom_text, string.format("%d%%", math.floor(ctx.camera.zoom * 100 + 0.5)))
+    end
+end
+
+local function screen_to_map(ctx, x, y)
+    local camera = ctx.camera or { zoom = 1, pan_x = 0, pan_y = 0 }
+    return vmath.vector3(
+        800 + (x - 800 - camera.pan_x) / camera.zoom,
+        450 + (y - 450 - camera.pan_y) / camera.zoom,
+        0
+    )
+end
+
+local function map_hit_radius(ctx, px)
+    return px / math.max(0.82, ctx.camera and ctx.camera.zoom or 1)
+end
+
+local function is_ui_zone(x, y)
+    if y >= 810 then return true end
+    if x <= 78 then return true end
+    if y <= 105 then return true end
+    if x >= 1160 and y >= 700 then return true end
+    return false
+end
+
 local function find_station(ctx, x, y, radius)
     local p = vmath.vector3(x, y, 0)
     local best = nil
@@ -139,14 +177,17 @@ local function add_hud(ctx)
     ui.text(ctx, 42, 422, "KPR", 0.66, C.muted, gui.PIVOT_CENTER)
     ui.text(ctx, 42, 355, "TRN", 0.66, C.muted, gui.PIVOT_CENTER)
 
+    ctx.buttons.zoom_out = ui.button(ctx, 1368, 60, 44, 44, "-", C.panel, C.border, C.white, 0.90)
+    ctx.zoom_text = ui.text(ctx, 1418, 60, "100%", 0.68, C.muted, gui.PIVOT_CENTER)
+    ctx.buttons.zoom_in = ui.button(ctx, 1468, 60, 44, 44, "+", C.panel, C.border, C.white, 0.90)
     ctx.buttons.home = ui.button(ctx, 1540, 60, 90, 44, "ANA", C.panel, C.border, C.white, 0.74)
 
     ui.panel(ctx, 1365, 758, 390, 86, C.panel, C.border)
     ui.text(ctx, 1195, 780, "YENİ YOLCU TALEBİ", 0.72, C.red, gui.PIVOT_W)
     ui.text(ctx, 1195, 748, "Kadıköy bölgesinde yoğunluk artıyor.", 0.62, C.muted, gui.PIVOT_W)
 
-    ui.panel(ctx, 275, 70, 390, 50, vmath.vector4(0.025, 0.085, 0.135, 0.92), C.border)
-    ui.text(ctx, 102, 70, "İstasyona basılı tut - diğer istasyonların üzerinden geç", 0.58, C.muted, gui.PIVOT_W)
+    ui.panel(ctx, 320, 70, 480, 50, vmath.vector4(0.025, 0.085, 0.135, 0.92), C.border)
+    ui.text(ctx, 102, 70, "Hat: istasyondan sürükle  |  Harita: boş alanda sürükle  |  +/- yakınlaştır", 0.54, C.muted, gui.PIVOT_W)
 end
 
 local function add_station_visual(ctx, station)
@@ -329,9 +370,18 @@ function M.build(ctx)
     ctx.trains = {}
     ctx.route_draft = nil
     ctx.preview_nodes = nil
+    ctx.pan_drag = nil
     ctx.hud_clock = 0
+    ctx.camera = { zoom = 1.0, pan_x = 0, pan_y = 0 }
 
+    ui.set_parent(ctx, nil)
     ui.box(ctx, 800, 450, 1600, 900, C.land)
+
+    -- Everything geographic lives below one transform root. This makes pan/zoom
+    -- independent from simulation and HUD state.
+    ctx.map_root = ui.box(ctx, 800, 450, 1, 1, vmath.vector4(0, 0, 0, 0))
+    ui.set_parent(ctx, ctx.map_root)
+
     add_city_texture(ctx)
     add_geography(ctx)
 
@@ -347,7 +397,12 @@ function M.build(ctx)
         add_station_visual(ctx, station)
     end
 
+    ui.set_parent(ctx, nil)
     add_hud(ctx)
+    apply_camera(ctx)
+
+    -- Dynamic route previews and trains are map children too.
+    ui.set_parent(ctx, ctx.map_root)
 end
 
 function M.update(ctx, dt)
@@ -360,8 +415,8 @@ function M.update(ctx, dt)
             local a = train.route.stops[train.i]
             local b = train.route.stops[train.j]
             local pos = geom.lerp(a.pos, b.pos, train.t)
-            ui.set_position(train.node, pos)
-            ui.set_position(train.glow, pos)
+            ui.set_map_position(train.node, pos)
+            ui.set_map_position(train.glow, pos)
         end
     end
 
@@ -376,6 +431,7 @@ function M.on_input(ctx, action)
     if action.released and ui.hit(ctx.buttons.home, action.x, action.y) then
         delete_preview(ctx)
         ctx.route_draft = nil
+        ctx.pan_drag = nil
         return "home"
     end
 
@@ -396,18 +452,40 @@ function M.on_input(ctx, action)
         return nil
     end
 
-    local pointer = vmath.vector3(action.x, action.y, 0)
+    if action.released and ui.hit(ctx.buttons.zoom_out, action.x, action.y) then
+        ctx.camera.zoom = clamp(ctx.camera.zoom - 0.15, 0.85, 1.65)
+        apply_camera(ctx)
+        return nil
+    end
+    if action.released and ui.hit(ctx.buttons.zoom_in, action.x, action.y) then
+        ctx.camera.zoom = clamp(ctx.camera.zoom + 0.15, 0.85, 1.65)
+        apply_camera(ctx)
+        return nil
+    end
+
+    local pointer = screen_to_map(ctx, action.x, action.y)
 
     if action.pressed then
-        local station = find_station(ctx, action.x, action.y, 34)
+        if is_ui_zone(action.x, action.y) then
+            return nil
+        end
+
+        local station = find_station(ctx, pointer.x, pointer.y, map_hit_radius(ctx, 36))
         if station then
             begin_route(ctx, station, pointer)
+        else
+            ctx.pan_drag = {
+                start_x = action.x,
+                start_y = action.y,
+                pan_x = ctx.camera.pan_x,
+                pan_y = ctx.camera.pan_y,
+            }
         end
         return nil
     end
 
     if ctx.route_draft and not action.released then
-        local station = find_station(ctx, action.x, action.y, 30)
+        local station = find_station(ctx, pointer.x, pointer.y, map_hit_radius(ctx, 31))
         if station then
             append_station(ctx, station)
         end
@@ -416,13 +494,26 @@ function M.on_input(ctx, action)
         return nil
     end
 
+    if ctx.pan_drag and not action.released then
+        ctx.camera.pan_x = clamp(ctx.pan_drag.pan_x + (action.x - ctx.pan_drag.start_x), -330, 330)
+        ctx.camera.pan_y = clamp(ctx.pan_drag.pan_y + (action.y - ctx.pan_drag.start_y), -210, 210)
+        apply_camera(ctx)
+        return nil
+    end
+
     if action.released and ctx.route_draft then
-        local station = find_station(ctx, action.x, action.y, 38)
+        local station = find_station(ctx, pointer.x, pointer.y, map_hit_radius(ctx, 40))
         if station then
             append_station(ctx, station)
         end
         finish_route(ctx)
         update_hud(ctx)
+        return nil
+    end
+
+    if action.released and ctx.pan_drag then
+        ctx.pan_drag = nil
+        return nil
     end
 
     return nil
