@@ -1,0 +1,10 @@
+.build/
+build/default/
+build/armv7-android/
+dist/
+.DS_Store
+*.keystore
+*.jks
+*.pass
+*.password
+tools/bob.jar

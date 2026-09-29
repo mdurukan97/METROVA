@@ -1,0 +1,78 @@
+local ui = require "ui.ui_factory"
+local home_screen = require "ui.home_screen"
+local game_screen = require "ui.game_screen"
+
+local TOUCH = hash("touch")
+local BACK = hash("back")
+
+local function normalize_action(action)
+    local out = {
+        x = action.x or 0,
+        y = action.y or 0,
+        pressed = action.pressed or false,
+        released = action.released or false,
+    }
+
+    if action.touch and action.touch[1] then
+        local touch = action.touch[1]
+        out.x = touch.x or out.x
+        out.y = touch.y or out.y
+        out.pressed = touch.pressed or false
+        out.released = touch.released or false
+    end
+
+    return out
+end
+
+local function switch_screen(self, screen_name)
+    ui.clear(self.ctx)
+    self.ctx.nodes = {}
+
+    if screen_name == "game" then
+        self.current = game_screen
+        game_screen.build(self.ctx)
+    else
+        self.current = home_screen
+        home_screen.build(self.ctx)
+    end
+end
+
+function init(self)
+    msg.post(".", "acquire_input_focus")
+    self.ctx = { nodes = {}, buttons = {} }
+    self.current = home_screen
+    home_screen.build(self.ctx)
+end
+
+function update(self, dt)
+    if self.current and self.current.update then
+        self.current.update(self.ctx, dt)
+    end
+end
+
+function on_input(self, action_id, action)
+    if action_id == BACK then
+        if action.released and self.ctx.screen == "game" then
+            switch_screen(self, "home")
+            return true
+        end
+        return false
+    end
+
+    if action_id ~= TOUCH then
+        return false
+    end
+
+    local normalized = normalize_action(action)
+    local next_screen = self.current.on_input(self.ctx, normalized)
+    if next_screen then
+        switch_screen(self, next_screen)
+    end
+    return true
+end
+
+function final(self)
+    if self.ctx then
+        ui.clear(self.ctx)
+    end
+end
