@@ -4,7 +4,9 @@ const { ccclass, property } = _decorator;
 @ccclass('MapCameraController')
 export class MapCameraController extends Component {
   @property minZoom = 1.0;
-  @property maxZoom = 2.5;
+  @property maxZoom = 4.0;
+  @property panLimitX = 980;
+  @property panLimitY = 540;
   @property panEnabled = true;
 
   private lastPinchDistance = 0;
@@ -41,6 +43,7 @@ export class MapCameraController extends Component {
         const current = this.node.scale.x;
         const next = Math.max(this.minZoom, Math.min(this.maxZoom, current * distance / this.lastPinchDistance));
         this.node.setScale(next, next, 1);
+        this.clampPan();
       }
       this.lastPinchDistance = distance;
       return;
@@ -50,6 +53,7 @@ export class MapCameraController extends Component {
       const delta = event.getUIDelta();
       const pos = this.node.position;
       this.node.setPosition(new Vec3(pos.x + delta.x, pos.y + delta.y, pos.z));
+      this.clampPan();
     }
   }
 
@@ -57,6 +61,20 @@ export class MapCameraController extends Component {
     const touches = event.getAllTouches();
     this.panning = touches.length === 1;
     if (touches.length < 2) this.lastPinchDistance = 0;
+  }
+
+  focus(position:Vec2,zoom=1.8){
+    const z=Math.max(this.minZoom,Math.min(this.maxZoom,zoom));
+    this.node.setScale(z,z,1);
+    this.node.setPosition(-position.x*z,-position.y*z,this.node.position.z);
+    this.clampPan();
+  }
+
+  private clampPan(){
+    const z=this.node.scale.x;
+    const x=Math.max(-this.panLimitX*z,Math.min(this.panLimitX*z,this.node.position.x));
+    const y=Math.max(-this.panLimitY*z,Math.min(this.panLimitY*z,this.node.position.y));
+    this.node.setPosition(x,y,this.node.position.z);
   }
 
   private distance(a:Vec2,b:Vec2) {
