@@ -33,7 +33,7 @@ export class LineBuildController extends Component {
   private palette=['#D4513B','#2F6F9F','#2F8F6B','#E0A035','#7A5AA6','#3A8D8A'];
 
   start(){
-    this.graphics=this.getComponent(Graphics) ?? this.addComponent(Graphics);
+    this.graphics=(this.getComponent(Graphics) ?? this.addComponent(Graphics))!;
     resources.load('data/istanbul-atlas',JsonAsset,(err,asset)=>{
       if(err){console.error(err);return;}
       const atlas=asset.json as any;
