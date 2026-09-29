@@ -37,9 +37,9 @@ export class IstanbulDistrictLayer extends Component {
     const viewport = ui.contentSize;
     const g = this.graphics;
     g.clear();
-    g.fillColor = new Color('#EFE6D4');
-    g.strokeColor = new Color('#C8BEAC');
-    g.lineWidth = 1.25;
+    g.fillColor = new Color('#101A1B');
+    g.strokeColor = new Color(55,74,78,165);
+    g.lineWidth = 0.9;
 
     for (const feature of collection.features) {
       const polygons:Polygon[] = feature.geometry.type === 'Polygon'
