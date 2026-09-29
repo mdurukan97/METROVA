@@ -11,6 +11,7 @@ import { StationDemandLayer } from './StationDemandLayer';
 import { TrainVisualLayer } from './TrainVisualLayer';
 import { NightHudBuilder } from './NightHudBuilder';
 import { RouteCameraDirector } from './RouteCameraDirector';
+import { LevelRuntimeController } from './LevelRuntimeController';
 const { ccclass } = _decorator;
 
 @ccclass('NightGameplayBootstrap')
@@ -60,6 +61,11 @@ export class NightGameplayBootstrap extends Component {
     this.node.addChild(hudNode);
     const hud=hudNode.addComponent(NightHudBuilder)!;
     hud.builder=builder;
+
+    const level=this.node.addComponent(LevelRuntimeController)!;
+    level.builder=builder;
+    level.levelId='IST-01';
+    hud.levelRuntime=level;
   }
 
   private layer<T extends Component>(parent:Node,name:string,type:new()=>T):T{
