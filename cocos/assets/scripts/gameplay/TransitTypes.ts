@@ -27,4 +27,5 @@ export type TrainState = {
   direction:1|-1;
   capacity:number;
   passengers:number;
+  onboardTargets:string[];
 };
