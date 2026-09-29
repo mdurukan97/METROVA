@@ -141,6 +141,14 @@ M.labels = {
     { text = "İSTANBUL BOĞAZI", pos = P(29.047, 41.065), angle = 82 },
     { text = "HALİÇ", pos = P(28.955, 41.038), angle = 18 },
     { text = "MARMARA DENİZİ", pos = P(29.050, 40.890), angle = 0 },
+    { text = "AVRUPA YAKASI", pos = P(28.835, 41.120), angle = 0, subtle = true },
+    { text = "ANADOLU YAKASI", pos = P(29.205, 41.075), angle = 0, subtle = true },
+}
+
+M.landmarks = {
+    { id = "galata", name = "Galata", pos = P(28.974, 41.026), kind = "tower" },
+    { id = "kiz_kulesi", name = "Kız Kulesi", pos = P(29.005, 41.021), kind = "islet" },
+    { id = "camlica", name = "Çamlıca", pos = P(29.068, 41.027), kind = "mast" },
 }
 
 return M

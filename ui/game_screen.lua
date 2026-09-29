@@ -173,9 +173,29 @@ local function add_geography(ctx)
     end
 
     for _, label in ipairs(istanbul.labels) do
-        local node = ui.text(ctx, label.pos.x, label.pos.y, label.text, 0.48,
-            vmath.vector4(0.38, 0.72, 1.0, 0.70), gui.PIVOT_CENTER)
+        local alpha = label.subtle and 0.20 or 0.70
+        local scale = label.subtle and 0.72 or 0.48
+        local node = ui.text(ctx, label.pos.x, label.pos.y, label.text, scale,
+            vmath.vector4(0.38, 0.72, 1.0, alpha), gui.PIVOT_CENTER)
         gui.set_rotation(node, vmath.quat_rotation_z(math.rad(label.angle or 0)))
+    end
+
+    -- Lightweight landmark silhouettes make the map immediately read as Istanbul.
+    for _, landmark in ipairs(istanbul.landmarks or {}) do
+        if landmark.kind == "tower" then
+            ui.box(ctx, landmark.pos.x, landmark.pos.y + 10, 13, 28, vmath.vector4(0.12, 0.23, 0.30, 0.96))
+            ui.circle(ctx, landmark.pos.x, landmark.pos.y + 28, 14, vmath.vector4(0.84, 0.63, 0.28, 0.82))
+            ui.line(ctx, vmath.vector3(landmark.pos.x, landmark.pos.y + 32, 0),
+                vmath.vector3(landmark.pos.x, landmark.pos.y + 48, 0), 2, C.gold)
+        elseif landmark.kind == "islet" then
+            ui.circle(ctx, landmark.pos.x, landmark.pos.y, 20, vmath.vector4(0.13, 0.22, 0.24, 1))
+            ui.box(ctx, landmark.pos.x, landmark.pos.y + 8, 11, 19, vmath.vector4(0.72, 0.64, 0.48, 0.92))
+            ui.circle(ctx, landmark.pos.x, landmark.pos.y + 21, 7, C.gold)
+        elseif landmark.kind == "mast" then
+            ui.line(ctx, vmath.vector3(landmark.pos.x, landmark.pos.y, 0),
+                vmath.vector3(landmark.pos.x, landmark.pos.y + 48, 0), 3, vmath.vector4(0.72, 0.84, 0.94, 0.65))
+            ui.circle(ctx, landmark.pos.x, landmark.pos.y + 50, 7, C.cyan)
+        end
     end
 end
 
@@ -292,6 +312,7 @@ local function create_route_train(ctx, route)
         dwell = 0.60,
         capacity = 18,
         onboard = 0,
+        onboard_by_destination = {},
     }
 
     local map_parent = ctx.parent
@@ -307,6 +328,10 @@ local function create_route_train(ctx, route)
     train.stripe = ui.box(ctx, first.pos.x, first.pos.y - 4, 34, 4, color)
     train.window = ui.box(ctx, first.pos.x - 3, first.pos.y + 2, 20, 5,
         vmath.vector4(0.035, 0.16, 0.24, 0.98))
+    train.load_bg = ui.box(ctx, first.pos.x - 2, first.pos.y - 8, 28, 2,
+        vmath.vector4(0.02, 0.07, 0.10, 0.95))
+    train.load_bar = ui.box(ctx, first.pos.x - 15, first.pos.y - 8, 2, 2, C.green)
+    gui.set_pivot(train.load_bar, gui.PIVOT_W)
     train.light = ui.circle(ctx, first.pos.x + 17, first.pos.y, 5, C.gold)
 
     ui.set_parent(ctx, map_parent)
@@ -360,6 +385,10 @@ local function append_station(ctx, station)
 
     local color = theme.route_colors[route.color_index]
     draw_route_segment(ctx, last, station, color)
+    last.routes = last.routes or {}
+    station.routes = station.routes or {}
+    last.routes[route.id] = true
+    station.routes[route.id] = true
     last.active_color = color
     station.active_color = color
     gui.set_color(last.core, color)
@@ -452,8 +481,47 @@ local function update_station_queues(ctx)
             gui.set_text(ctx.alert_title, "YOLCU TALEBİ")
             gui.set_color(ctx.alert_title, C.cyan)
         end
-        gui.set_text(ctx.alert_body, worst.name .. ": " .. waiting .. " yolcu bekliyor.")
+        local destination, destination_count = passenger_system.top_destination(worst, ctx.station_index)
+        local suffix = ""
+        if destination and destination_count > 0 then
+            suffix = "  >  " .. destination.name .. " " .. destination_count
+        end
+
+        if level >= 3 then
+            local remaining = math.max(0, math.ceil((worst.max_critical_time or 14) - (worst.critical_time or 0)))
+            gui.set_text(ctx.alert_body, worst.name .. ": " .. waiting .. "/" .. worst.capacity ..
+                "  |  Kritik " .. remaining .. " sn")
+        else
+            gui.set_text(ctx.alert_body, worst.name .. ": " .. waiting .. " yolcu" .. suffix)
+        end
     end
+end
+
+local function show_failure(ctx, station)
+    if ctx.failed or ctx.completed then return end
+    ctx.failed = true
+    ctx.simulation.paused = true
+
+    local map_parent = ctx.parent
+    ui.set_parent(ctx, nil)
+
+    ui.box(ctx, 800, 450, 1600, 900, vmath.vector4(0.01, 0.0, 0.02, 0.78))
+    ui.panel(ctx, 800, 455, 590, 370, vmath.vector4(0.075, 0.025, 0.045, 0.985), C.red)
+    ui.text(ctx, 800, 580, "İSTASYON TAŞTI", 1.58, C.white, gui.PIVOT_CENTER)
+    ui.text(ctx, 800, 535, station.name, 1.02, C.red, gui.PIVOT_CENTER)
+    ui.text(ctx, 800, 492, "Yolcu talebi kapasiteyi uzun süre aştı.", 0.72, C.muted, gui.PIVOT_CENTER)
+    ui.text(ctx, 800, 458, "Hatları yoğun istasyonlara bağlayıp trenleri düzenli çalıştır.", 0.62, C.muted, gui.PIVOT_CENTER)
+
+    ui.panel(ctx, 800, 390, 380, 58, vmath.vector4(0.12, 0.045, 0.055, 0.98), C.orange)
+    ui.text(ctx, 690, 390, "BEKLEYEN", 0.67, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 920, 390, tostring(math.floor(station.waiting or 0)), 0.96, C.white, gui.PIVOT_E)
+
+    ctx.buttons.retry = ui.button(ctx, 715, 285, 210, 58,
+        "TEKRAR DENE", C.red, C.orange, C.white, 0.88)
+    ctx.buttons.failure_home = ui.button(ctx, 930, 285, 190, 58,
+        "ANA MENÜ", C.panel_hover, C.border, C.white, 0.82)
+
+    ui.set_parent(ctx, map_parent)
 end
 
 local function show_completion(ctx, connected)
@@ -477,12 +545,14 @@ local function show_completion(ctx, connected)
     ui.text(ctx, 950, 420, tostring(#ctx.routes), 0.88, C.white, gui.PIVOT_E)
     ui.text(ctx, 650, 382, "Taşınan yolcu", 0.70, C.muted, gui.PIVOT_W)
     ui.text(ctx, 950, 382, format_int(ctx.simulation.passengers), 0.88, C.white, gui.PIVOT_E)
+    ui.text(ctx, 650, 348, "Memnuniyet", 0.70, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 950, 348, "%" .. tostring(math.floor(ctx.simulation.approval)), 0.88, C.white, gui.PIVOT_E)
 
-    ui.panel(ctx, 800, 325, 390, 62, vmath.vector4(0.06, 0.16, 0.20, 0.96), C.green)
-    ui.text(ctx, 690, 325, "BÖLÜM ÖDÜLÜ", 0.68, C.muted, gui.PIVOT_W)
-    ui.text(ctx, 925, 325, "+250 Metro Coin", 0.92, C.gold, gui.PIVOT_E)
+    ui.panel(ctx, 800, 300, 390, 62, vmath.vector4(0.06, 0.16, 0.20, 0.96), C.green)
+    ui.text(ctx, 690, 300, "BÖLÜM ÖDÜLÜ", 0.68, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 925, 300, "+250 Metro Coin", 0.92, C.gold, gui.PIVOT_E)
 
-    ctx.buttons.complete_home = ui.button(ctx, 800, 245, 300, 58,
+    ctx.buttons.complete_home = ui.button(ctx, 800, 225, 300, 58,
         "ANA MENÜYE DÖN", C.blue, C.cyan, C.white, 0.90)
 
     ui.set_parent(ctx, map_parent)
@@ -540,6 +610,7 @@ function M.build(ctx)
     ctx.hud_clock = 0
     ctx.anim_clock = 0
     ctx.completed = false
+    ctx.failed = false
     ctx.camera = { zoom = 1.0, pan_x = 0, pan_y = 0 }
 
     ui.set_parent(ctx, nil)
@@ -579,7 +650,15 @@ function M.update(ctx, dt)
     ctx.anim_clock = ctx.anim_clock + dt
 
     if not ctx.simulation.paused then
-        passenger_system.update(ctx.stations, dt, ctx.simulation.speed)
+        local failed_station = passenger_system.update(ctx.stations, dt, ctx.simulation.speed)
+        local worst = passenger_system.worst_station(ctx.stations)
+        if worst and passenger_system.level(worst) >= 3 then
+            simulation_system.record_overcrowding(ctx.simulation, dt,
+                1 + passenger_system.critical_progress(worst))
+        end
+        if failed_station then
+            show_failure(ctx, failed_station)
+        end
     end
 
     for index, station in ipairs(ctx.stations) do
@@ -604,9 +683,25 @@ function M.update(ctx, dt)
             if arrived then
                 local delivered, boarded = passenger_system.serve(arrived, train)
                 simulation_system.record_delivery(ctx.simulation, delivered)
+            end
+
+            local occupancy = (train.onboard or 0) / math.max(1, train.capacity or 18)
+            local load_color = C.green
+            if occupancy >= 0.85 then
+                load_color = C.red
+            elseif occupancy >= 0.55 then
+                load_color = C.orange
+            end
+            gui.set_color(train.load_bar, load_color)
+            gui.set_size(train.load_bar, vmath.vector3(math.max(2, 28 * ui.x_scale() * occupancy), 2, 0))
+
+            if train.dwell > 0 then
                 gui.set_color(train.window, C.cyan)
-            elseif train.dwell <= 0 then
+                local door_pulse = 0.88 + 0.12 * math.sin(ctx.anim_clock * 14)
+                gui.set_scale(train.body, vmath.vector3(1, door_pulse, 1))
+            else
                 gui.set_color(train.window, vmath.vector4(0.035, 0.16, 0.24, 0.98))
+                gui.set_scale(train.body, vmath.vector3(1, 1, 1))
             end
 
             local a = train.route.stops[train.i]
@@ -624,6 +719,16 @@ function M.update(ctx, dt)
 end
 
 function M.on_input(ctx, action)
+    if ctx.failed then
+        if action.released and ui.hit(ctx.buttons.retry, action.x, action.y) then
+            return "game"
+        end
+        if action.released and ui.hit(ctx.buttons.failure_home, action.x, action.y) then
+            return "home"
+        end
+        return nil
+    end
+
     if ctx.completed then
         if action.released and ui.hit(ctx.buttons.complete_home, action.x, action.y) then
             return "home"

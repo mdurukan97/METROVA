@@ -121,7 +121,7 @@ function M.build(ctx)
     ui.text(ctx, 58, 653, "GARAJ", 0.98, C.muted, gui.PIVOT_W)
     ui.text(ctx, 58, 591, "MARKET", 0.98, C.muted, gui.PIVOT_W)
     ui.text(ctx, 58, 529, "AYARLAR", 0.98, C.muted, gui.PIVOT_W)
-    ui.text(ctx, 31, 34, "MHDRN STÜDYOSU  v0.6", 0.72, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 31, 34, "MHDRN STÜDYOSU  v0.7", 0.72, C.muted, gui.PIVOT_W)
 
     -- Brand and account bar
     ui.text(ctx, 220, 838, "METROVA", 3.25, C.white, gui.PIVOT_W)
@@ -137,7 +137,7 @@ function M.build(ctx)
     ui.panel(ctx, 400, 630, 395, 118, C.panel, C.border)
     ui.text(ctx, 250, 664, "İSTANBUL", 1.48, C.white, gui.PIVOT_W)
     ui.text(ctx, 250, 630, "IST-01  -  İlk Hat", 0.92, C.muted, gui.PIVOT_W)
-    ui.text(ctx, 250, 600, "Şehrindeki ilk metro hattını kur.", 0.78, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 250, 600, "İlk hattını kur, yolcu akışını yönet.", 0.78, C.muted, gui.PIVOT_W)
     ctx.buttons.continue = ui.button(ctx, 400, 520, 395, 70, ">  DEVAM ET", C.blue, vmath.vector4(0.1, 0.65, 1, 1), C.white, 1.35)
     ui.text(ctx, 400, 487, "İstanbul  -  IST-01", 0.72, C.muted, gui.PIVOT_CENTER)
 

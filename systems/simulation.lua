@@ -32,6 +32,7 @@ function M.update(sim, dt, active_routes)
 
     local scaled = dt * sim.speed
     sim.clock = sim.clock + scaled
+
     if sim.clock >= 15 then
         sim.clock = sim.clock - 15
         sim.month = sim.month + 1
@@ -49,7 +50,15 @@ function M.record_delivery(sim, count)
     end
     sim.passengers = sim.passengers + count
     sim.budget = sim.budget + count * sim.fare
-    sim.approval = math.min(100, sim.approval + count * 0.01)
+    sim.approval = math.min(100, sim.approval + count * 0.012)
+end
+
+function M.record_overcrowding(sim, dt, severity)
+    if sim.paused then
+        return
+    end
+    local amount = dt * (severity or 1) * 0.08
+    sim.approval = math.max(0, sim.approval - amount)
 end
 
 return M

@@ -11,3 +11,12 @@ The vertical slice is accepted only when all of these are true on an Android pho
 - Pause and speed buttons change simulation state.
 - Back/Home returns without a crash.
 - No feature expansion happens before these checks pass.
+
+## v0.7 gameplay gate
+
+- Passengers have destinations, not just a global counter.
+- Trains only board passengers whose destination exists on that train's route.
+- Trains dwell at stations and visually communicate occupancy.
+- Sustained station overflow creates a failure state with Retry/Home actions.
+- The live alert panel identifies the worst station and its dominant destination.
+- Istanbul landmarks, side labels and station demand feedback remain inside the map camera layer.
