@@ -1,34 +1,49 @@
 name: Cocos Runtime Web Smoke Build
 
 on:
-  push:
-    branches: [ cocos-rewrite ]
-    paths:
-      - 'cocos/**'
-      - '.github/workflows/cocos-runtime-smoke.yml'
+  workflow_run:
+    workflows: ["Validate Cocos Rewrite"]
+    types: [completed]
+    branches: [cocos-rewrite]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-cocos-rewrite
   cancel-in-progress: true
 
 jobs:
   build-web-runtime:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22.17.0'
+
+      - name: Download validated Istanbul atlas
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: istanbul-night-atlas
+          path: cocos/assets/data
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Prepare METROVA runtime data
         shell: pwsh
         working-directory: cocos
         run: |
           npm install
-          npm run runtime:prepare
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            npm run runtime:prepare
+          } else {
+            npm run runtime:sync
+          }
           npm run runtime:validate
           npx tsc --noEmit
           npm test
@@ -36,7 +51,7 @@ jobs:
       - name: Build pinned Cocos CLI
         shell: pwsh
         run: |
-          git clone https://github.com/cocos/cocos-cli.git "$env:RUNNER_TEMP/cocos-cli"
+          git clone --filter=blob:none https://github.com/cocos/cocos-cli.git "$env:RUNNER_TEMP/cocos-cli"
           Set-Location "$env:RUNNER_TEMP/cocos-cli"
           git checkout 4aeaf59a7d7694a69e753ed7d2c649d98eb18134
           npm install -g node-gyp
