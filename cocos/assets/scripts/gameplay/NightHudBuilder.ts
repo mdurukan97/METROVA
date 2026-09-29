@@ -14,7 +14,7 @@ export class NightHudBuilder extends Component {
   private resultPanel!:Node; private resultTitle!:Label; private resultDetail!:Label;
 
   start(){
-    const ui=this.getComponent(UITransform)??this.addComponent(UITransform);
+    const ui=((this.getComponent(UITransform) ?? this.addComponent(UITransform))!)!;
     if(ui.contentSize.width<100)ui.setContentSize(1280,720);
     this.panel('Brand',-535,326,210,62,'METROVA\nİSTANBUL',22);
     const missionPanel=this.panel('Mission',-330,326,185,62,'',16);
