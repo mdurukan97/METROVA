@@ -15,6 +15,7 @@
     "atlas:validate": "node tools/validate-station-districts.mjs",
     "atlas:m4": "node tools/fetch-m4-stations.mjs",
     "atlas:roads": "node tools/fetch-night-roads.mjs",
-    "atlas:night": "npm run atlas:fetch && npm run atlas:m4 && npm run atlas:roads && npm run atlas:validate"
+    "atlas:night": "npm run atlas:fetch && npm run atlas:m4 && npm run atlas:m4:merge && npm run atlas:roads && npm run atlas:validate",
+    "atlas:m4:merge": "node tools/merge-m4-atlas.mjs"
   }
 }
