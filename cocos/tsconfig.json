@@ -5,8 +5,16 @@
     "strict": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
-    "types": ["@cocos/creator-types/engine"],
+    "types": [
+      "@cocos/creator-types/engine",
+      "node"
+    ],
     "moduleResolution": "node"
   },
-  "exclude": ["build", "library", "local", "temp"]
+  "exclude": [
+    "build",
+    "library",
+    "local",
+    "temp"
+  ]
 }
