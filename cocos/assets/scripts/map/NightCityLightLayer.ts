@@ -1,5 +1,6 @@
 import { _decorator, Color, Component, Graphics, JsonAsset, Node, resources, UITransform, Vec2 } from 'cc';
 import { GeoProjector } from './GeoProjector';
+import { ISTANBUL_GAMEPLAY_BOUNDS } from './MapProjectionConfig';
 const { ccclass, property } = _decorator;
 
 type Road={id:number;tier:number;points:[number,number][]};
@@ -18,7 +19,7 @@ export class NightCityLightLayer extends Component {
     resources.load('data/istanbul-night-roads',JsonAsset,(err,asset)=>{
       if(err)return;
       const data=asset.json as RoadAsset;
-      this.projector=new GeoProjector(data.bounds);
+      this.projector=new GeoProjector(ISTANBUL_GAMEPLAY_BOUNDS);
       this.roads=data.roads;
       this.redraw(true);
     });
