@@ -2,11 +2,13 @@ import { _decorator, Color, Component, EventTouch, Graphics, JsonAsset, Node, re
 import { GeoProjector } from '../map/GeoProjector';
 import { GeoMath } from './GeoMath';
 import { BosphorusRule } from './BosphorusRule';
-import { NetworkModel } from './NetworkModel';
+import { NetworkModel, NetworkSnapshot } from './NetworkModel';
 import { BuiltLine, StationAnchor, TrainState } from './TransitTypes';
 import { PassengerSimulation } from './PassengerSimulation';
 import { NetworkMetrics } from './NetworkMetrics';
 import { ISTANBUL_GAMEPLAY_BOUNDS } from '../map/MapProjectionConfig';
+import { GameClock } from './GameClock';
+import { UndoStack } from './UndoStack';
 const { ccclass, property } = _decorator;
 
 @ccclass('LineBuildController')
@@ -24,6 +26,10 @@ export class LineBuildController extends Component {
   private dragFrom:StationAnchor|null=null;
   private pointer=new Vec2();
   private selectedLineId:string|undefined;
+  public readonly clock=new GameClock();
+  private undoStack=new UndoStack<NetworkSnapshot>(6000);
+  private buildPreview:{from:string;to:string;distanceKm:number;costM:number;tunnel:boolean}|null=null;
+  private planned:{from:string;to:string;lineId?:string}|null=null;
   private palette=['#D4513B','#2F6F9F','#2F8F6B','#E0A035','#7A5AA6','#3A8D8A'];
 
   start(){
@@ -49,8 +55,11 @@ export class LineBuildController extends Component {
 
   update(dt:number){
     if(!this.model)return;
-    this.model.tick(dt);
-    this.passengers?.tick(dt,this.activeStationIds,this.model.lines,this.model.trains);
+    const scaled=this.clock.scaledDelta(dt);
+    if(scaled>0){
+      this.model.tick(scaled);
+      this.passengers?.tick(scaled,this.activeStationIds,this.model.lines,this.model.trains);
+    }
     this.redraw();
   }
 
@@ -58,7 +67,7 @@ export class LineBuildController extends Component {
     if(!this.model)return;
     const local=this.toLocal(e.getUILocation());
     const hit=this.nearest(local);
-    if(hit && hit.distance<=this.snapRadius){
+    if(hit && hit.distance<=this.snapRadius && this.activeStationIds.includes(hit.station.id)){
       this.dragFrom=hit.station;
       this.pointer=local;
     }
@@ -67,6 +76,7 @@ export class LineBuildController extends Component {
   private onMove(e:EventTouch){
     if(!this.dragFrom)return;
     this.pointer=this.toLocal(e.getUILocation());
+    this.refreshBuildPreview();
     this.redraw();
   }
 
@@ -74,24 +84,83 @@ export class LineBuildController extends Component {
     if(!this.dragFrom)return;
     const local=this.toLocal(e.getUILocation());
     const hit=this.nearest(local);
-    if(hit && hit.distance<=this.snapRadius && hit.station.id!==this.dragFrom.id){
-      try{
-        const extend=this.selectedLineId&&this.model.canExtend(this.selectedLineId,this.dragFrom.id)?this.selectedLineId:undefined;
-        const result=this.model.connect(this.dragFrom.id,hit.station.id,extend);
-        this.selectedLineId=result.line.id;
-      }catch(err){ console.warn('[METROVA]',err); }
+    if(hit && hit.distance<=this.snapRadius && hit.station.id!==this.dragFrom.id && this.activeStationIds.includes(hit.station.id)){
+      const extend=this.selectedLineId&&this.model.canExtend(this.selectedLineId,this.dragFrom.id)?this.selectedLineId:undefined;
+      if(this.clock.paused){
+        this.planned={from:this.dragFrom.id,to:hit.station.id,lineId:extend};
+      }else{
+        this.commitConnection(this.dragFrom.id,hit.station.id,extend);
+      }
     }
     this.dragFrom=null;
+    this.buildPreview=null;
     this.redraw();
   }
 
   addTrain(){
-    if(!this.selectedLineId)return;
-    try{this.model.addTrain(this.selectedLineId);}catch(err){console.warn('[METROVA]',err);}
+    if(!this.selectedLineId||this.clock.paused)return;
+    try{
+      this.undoStack.push(this.model.snapshot());
+      this.model.addTrain(this.selectedLineId);
+    }catch(err){console.warn('[METROVA]',err);}
   }
+
+  togglePause(){
+    if(this.clock.paused){
+      this.clock.resume();
+      this.commitPlan();
+    }else this.clock.pause();
+  }
+
+  setSpeed(speed:1|2|3){
+    const wasPaused=this.clock.paused;
+    this.clock.setSpeed(speed);
+    if(wasPaused)this.commitPlan();
+  }
+
+  undo(){
+    const state=this.undoStack.pop();
+    if(!state)return false;
+    this.model.restore(state);
+    if(this.selectedLineId&&!this.model.lines.some(l=>l.id===this.selectedLineId))this.selectedLineId=undefined;
+    this.redraw();
+    return true;
+  }
+
+  getUndoSeconds(){return this.undoStack.secondsLeft();}
+
+  getBuildPreview(){return this.buildPreview;}
+
+  getPlannedBuild(){return this.planned;}
 
   setActiveStations(ids:string[]){
     this.activeStationIds=ids.filter(id=>this.stations.has(id));
+  }
+
+  private commitConnection(from:string,to:string,lineId?:string){
+    try{
+      this.undoStack.push(this.model.snapshot());
+      const result=this.model.connect(from,to,lineId);
+      this.selectedLineId=result.line.id;
+    }catch(err){console.warn('[METROVA]',err);}
+  }
+
+  private commitPlan(){
+    if(!this.planned)return;
+    const p=this.planned;
+    this.planned=null;
+    this.commitConnection(p.from,p.to,p.lineId);
+  }
+
+  private refreshBuildPreview(){
+    if(!this.dragFrom){this.buildPreview=null;return;}
+    const target=this.nearest(this.pointer);
+    if(!target||target.distance>this.snapRadius||target.station.id===this.dragFrom.id||!this.activeStationIds.includes(target.station.id)){
+      this.buildPreview=null;return;
+    }
+    const tunnel=BosphorusRule.requiresTunnel(this.dragFrom,target.station);
+    const distanceKm=GeoMath.distanceKm(this.dragFrom,target.station);
+    this.buildPreview={from:this.dragFrom.id,to:target.station.id,distanceKm,costM:GeoMath.segmentCostM(distanceKm,tunnel),tunnel};
   }
 
   isBuildingLine(){return this.dragFrom!==null;}
@@ -142,6 +211,12 @@ export class LineBuildController extends Component {
         if(seg.tunnel) this.dashed(g,a,b,12,8); else {g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();}
       }
     }
+    if(this.planned){
+      const a=this.project(this.stations.get(this.planned.from)!,size);
+      const b=this.project(this.stations.get(this.planned.to)!,size);
+      g.strokeColor=new Color(116,196,255,205);g.lineWidth=7;
+      this.dashed(g,a,b,14,8);
+    }
     if(this.dragFrom){
       const a=this.project(this.dragFrom,size);
       const target=this.nearest(this.pointer);
@@ -162,6 +237,7 @@ export class LineBuildController extends Component {
     const size=this.getComponent(UITransform)!.contentSize;
     let best:{station:StationAnchor;distance:number}|null=null;
     for(const s of this.stations.values()){
+      if(!this.activeStationIds.includes(s.id))continue;
       const d=Vec2.distance(p,this.project(s,size));
       if(!best||d<best.distance)best={station:s,distance:d};
     }
