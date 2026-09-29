@@ -1,0 +1,100 @@
+{
+  "$schema": "../temp/cocos.config.schema.json",
+  "version": "1.0.0",
+  "builder": {
+    "platforms": {
+      "web-mobile": {
+        "outputName": "metrova-web",
+        "packages": {
+          "web-mobile": {
+            "orientation": "landscape",
+            "embedWebDebugger": false,
+            "polyfills": { "asyncFunctions": true },
+            "buildPath": "project://build",
+            "outputName": "metrova-web",
+            "mainBundleCompressionType": "merge_dep",
+            "platform": "web-mobile",
+            "startScene": "a1b2c3d4-e5f6-47a8-9123-456789abcdef"
+          }
+        }
+      },
+      "android": {
+        "outputName": "metrova-android",
+        "packages": {
+          "android": {
+            "packageName": "net.mhdrn.metrova",
+            "resizeableActivity": true,
+            "maxAspectRatio": "2.4",
+            "orientation": {
+              "landscapeRight": true,
+              "landscapeLeft": true,
+              "portrait": false
+            },
+            "apiLevel": 35,
+            "appABIs": ["arm64-v8a"],
+            "useDebugKeystore": true,
+            "keystorePath": "",
+            "keystorePassword": "",
+            "keystoreAlias": "",
+            "keystoreAliasPassword": "",
+            "appBundle": false,
+            "androidInstant": false,
+            "inputSDK": false,
+            "remoteUrl": "",
+            "sdkPath": "",
+            "ndkPath": "",
+            "javaHome": "",
+            "swappy": false,
+            "isSoFileCompressed": true,
+            "renderBackEnd": {
+              "vulkan": false,
+              "gles3": true,
+              "gles2": false
+            },
+            "buildPath": "project://build",
+            "outputName": "metrova-android",
+            "platform": "android",
+            "startScene": "a1b2c3d4-e5f6-47a8-9123-456789abcdef"
+          }
+        }
+      }
+    },
+    "common": {
+      "platform": "web-mobile",
+      "name": "METROVA",
+      "buildPath": "project://build",
+      "debug": true,
+      "buildMode": "normal",
+      "mangleProperties": false,
+      "md5Cache": false,
+      "skipCompressTexture": false,
+      "sourceMaps": true,
+      "nativeCodeBundleMode": "wasm",
+      "polyfills": { "asyncFunctions": true },
+      "experimentalEraseModules": false,
+      "startSceneAssetBundle": true,
+      "bundleConfigs": [],
+      "inlineEnum": true,
+      "mainBundleIsRemote": false,
+      "mainBundleCompressionType": "merge_dep",
+      "useSplashScreen": false,
+      "bundleCommonChunk": false,
+      "packAutoAtlas": true,
+      "binGroupConfig": { "threshold": 16, "enable": false },
+      "useBuiltinServer": false
+    }
+  },
+  "engine": {
+    "designResolution": {
+      "width": 1280,
+      "height": 720,
+      "fitWidth": false,
+      "fitHeight": true
+    }
+  },
+  "script": {
+    "useDefineForClassFields": false,
+    "allowDeclareFields": false,
+    "preserveSymlinks": true
+  }
+}
