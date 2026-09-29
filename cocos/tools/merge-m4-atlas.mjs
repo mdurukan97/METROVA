@@ -55,4 +55,17 @@ const nonM4=atlas.stations.filter(s=>!s.officialLines?.includes('M4'));
 atlas.stations=[...nonM4,...output];
 atlas.generated={m4VerifiedAt:new Date().toISOString(),m4StationCount:output.length,coordinateSource:'OpenStreetMap',attribution:'© OpenStreetMap contributors · ODbL'};
 await writeFile('assets/data/istanbul-atlas.json',JSON.stringify(atlas,null,2)+'\n');
-console.log('Merged '+output.length+' verified M4 stations into the playable Istanbul atlas.');
+const pendik=output.find(s=>s.name==='Pendik');
+if(!pendik)throw new Error('Verified Pendik station is missing from M4 output');
+await writeFile('assets/data/pendik-sandbox.json',JSON.stringify({
+  schemaVersion:1,
+  id:'DEV-PENDIK',
+  debugOnly:true,
+  campaignProgression:false,
+  name:'Kadıköy → Pendik Hat Testi',
+  budgetM:180,
+  stations:output.filter(s=>s.officialOrder<=pendik.officialOrder).map(s=>s.id),
+  objective:{type:'connect',from:output[0].id,to:pendik.id},
+  note:'Developer-only geographic/network test. Does not alter locked IST-01–25 progression.'
+},null,2)+'\n');
+console.log('Merged '+output.length+' verified M4 stations and generated the Kadıköy→Pendik developer sandbox.');
