@@ -3,7 +3,9 @@ import { GeoProjector } from '../map/GeoProjector';
 import { GeoMath } from './GeoMath';
 import { BosphorusRule } from './BosphorusRule';
 import { NetworkModel } from './NetworkModel';
-import { StationAnchor } from './TransitTypes';
+import { BuiltLine, StationAnchor, TrainState } from './TransitTypes';
+import { PassengerSimulation } from './PassengerSimulation';
+import { NetworkMetrics } from './NetworkMetrics';
 const { ccclass, property } = _decorator;
 
 @ccclass('LineBuildController')
@@ -15,6 +17,9 @@ export class LineBuildController extends Component {
   private projector!:GeoProjector;
   private stations=new Map<string,StationAnchor>();
   private model!:NetworkModel;
+  public passengers!:PassengerSimulation;
+  public metrics!:NetworkMetrics;
+  private activeStationIds:string[]=[];
   private dragFrom:StationAnchor|null=null;
   private pointer=new Vec2();
   private selectedLineId:string|undefined;
@@ -29,6 +34,10 @@ export class LineBuildController extends Component {
       for(const s of atlas.stations as StationAnchor[]) this.stations.set(s.id,s);
       this.model=new NetworkModel(this.stations);
       this.model.budgetM=64;
+      this.passengers=new PassengerSimulation(this.stations.values());
+      this.metrics=new NetworkMetrics(this.model,this.passengers);
+      this.activeStationIds=['yenikapi','taksim','mecidiyekoy','gayrettepe','uskudar','altunizade'];
+      this.model.onTrainArrive=(train,line,stationId)=>this.onTrainArrive(train,line,stationId);
       this.redraw();
     });
     this.node.on(Node.EventType.TOUCH_START,this.onStart,this);
@@ -40,6 +49,7 @@ export class LineBuildController extends Component {
   update(dt:number){
     if(!this.model)return;
     this.model.tick(dt);
+    this.passengers?.tick(dt,this.activeStationIds,this.model.lines,this.model.trains);
     this.redraw();
   }
 
@@ -65,7 +75,8 @@ export class LineBuildController extends Component {
     const hit=this.nearest(local);
     if(hit && hit.distance<=this.snapRadius && hit.station.id!==this.dragFrom.id){
       try{
-        const result=this.model.connect(this.dragFrom.id,hit.station.id,this.selectedLineId);
+        const extend=this.selectedLineId&&this.model.canExtend(this.selectedLineId,this.dragFrom.id)?this.selectedLineId:undefined;
+        const result=this.model.connect(this.dragFrom.id,hit.station.id,extend);
         this.selectedLineId=result.line.id;
       }catch(err){ console.warn('[METROVA]',err); }
     }
@@ -76,6 +87,26 @@ export class LineBuildController extends Component {
   addTrain(){
     if(!this.selectedLineId)return;
     try{this.model.addTrain(this.selectedLineId);}catch(err){console.warn('[METROVA]',err);}
+  }
+
+  setActiveStations(ids:string[]){
+    this.activeStationIds=ids.filter(id=>this.stations.has(id));
+  }
+
+  getMetrics(){
+    return this.metrics?.snapshot() ?? null;
+  }
+
+  private onTrainArrive(train:TrainState,line:BuiltLine,stationId:string){
+    if(!this.passengers)return;
+    const remaining=this.passengers.deliver(
+      train.onboardTargets.map((target,index)=>({id:index,origin:'',target,waitSeconds:0})),
+      stationId
+    );
+    train.onboardTargets=remaining.map(p=>p.target);
+    const boarded=this.passengers.boardAt(stationId,line,train.capacity-train.onboardTargets.length);
+    train.onboardTargets.push(...boarded.map(p=>p.target));
+    train.passengers=train.onboardTargets.length;
   }
 
   private redraw(){
