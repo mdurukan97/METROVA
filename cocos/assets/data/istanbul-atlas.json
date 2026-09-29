@@ -3,40 +3,253 @@
   "map": {
     "id": "istanbul-atlas",
     "projection": "geographic-atlas",
-    "bounds": {"west":27.95,"east":30.02,"south":40.74,"north":41.62},
+    "bounds": {
+      "west": 28.82,
+      "east": 29.34,
+      "south": 40.84,
+      "north": 41.13
+    },
     "districtGeometryAsset": "data/istanbul-district-geometry",
-    "designRule": "District/coast geometry is geographic. Station anchors are geographic. Only label placement may be shifted for readability."
+    "designRule": "District/coast geometry is geographic. Station anchors are geographic. Only label placement may be shifted for readability.",
+    "scope": "Playable Istanbul campaign viewport: historic peninsula/Bosphorus through Pendik/Sabiha corridor"
   },
   "stations": [
-    {"id":"yenikapi","name":"Yenikapı","district":"Fatih","lat":41.0054,"lon":28.9521,"role":"hub","officialLines":["M1A","M1B","M2"],"coordinateStatus":"seed"},
-    {"id":"sishane","name":"Şişhane","district":"Beyoğlu","lat":41.0282,"lon":28.9746,"role":"station","officialLines":["M2"],"coordinateStatus":"seed"},
-    {"id":"taksim","name":"Taksim","district":"Beyoğlu","lat":41.0369,"lon":28.9850,"role":"hub","officialLines":["M2"],"coordinateStatus":"seed"},
-    {"id":"mecidiyekoy","name":"Şişli-Mecidiyeköy","district":"Şişli","lat":41.0664,"lon":28.9930,"role":"hub","officialLines":["M2","M7"],"coordinateStatus":"seed"},
-    {"id":"gayrettepe","name":"Gayrettepe","district":"Beşiktaş","lat":41.0655,"lon":29.0050,"role":"hub","officialLines":["M2","M11"],"coordinateStatus":"seed"},
-    {"id":"levent","name":"Levent","district":"Beşiktaş","lat":41.0810,"lon":29.0115,"role":"hub","officialLines":["M2","M6"],"coordinateStatus":"seed"},
-    {"id":"uskudar","name":"Üsküdar","district":"Üsküdar","lat":41.0265,"lon":29.0151,"role":"hub","officialLines":["M5"],"coordinateStatus":"seed"},
-    {"id":"altunizade","name":"Altunizade","district":"Üsküdar","lat":41.0218,"lon":29.0435,"role":"hub","officialLines":["M5"],"coordinateStatus":"seed"},
-    {"id":"dudullu","name":"Dudullu","district":"Ümraniye","lat":41.0169,"lon":29.1617,"role":"hub","officialLines":["M5","M8"],"coordinateStatus":"seed"},
-    {"id":"kadikoy","name":"Kadıköy","district":"Kadıköy","lat":40.9909,"lon":29.0233,"role":"hub","officialLines":["M4"],"coordinateStatus":"seed"},
-    {"id":"ayrilikcesmesi","name":"Ayrılık Çeşmesi","district":"Kadıköy","lat":40.9984,"lon":29.0394,"role":"hub","officialLines":["M4"],"coordinateStatus":"seed"},
-    {"id":"kozyatagi","name":"Kozyatağı","district":"Kadıköy","lat":40.9686,"lon":29.1008,"role":"hub","officialLines":["M4","M8"],"coordinateStatus":"seed"},
-    {"id":"bostanci","name":"Bostancı","district":"Kadıköy","lat":40.9585,"lon":29.0965,"role":"hub","officialLines":["M4","M8"],"coordinateStatus":"seed"},
-    {"id":"kartal","name":"Kartal","district":"Kartal","lat":40.8882,"lon":29.1856,"role":"station","officialLines":["M4"],"coordinateStatus":"seed"},
-    {"id":"pendik","name":"Pendik","district":"Pendik","lat":40.8800,"lon":29.2316,"role":"hub","officialLines":["M4"],"coordinateStatus":"seed"},
-    {"id":"sabiha","name":"Sabiha Gökçen Havalimanı","district":"Pendik","lat":40.8983,"lon":29.3092,"role":"terminal","officialLines":["M4"],"coordinateStatus":"seed"}
+    {
+      "id": "yenikapi",
+      "name": "Yenikapı",
+      "district": "Fatih",
+      "lat": 41.0054,
+      "lon": 28.9521,
+      "role": "hub",
+      "officialLines": [
+        "M1A",
+        "M1B",
+        "M2"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "sishane",
+      "name": "Şişhane",
+      "district": "Beyoğlu",
+      "lat": 41.0282,
+      "lon": 28.9746,
+      "role": "station",
+      "officialLines": [
+        "M2"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "taksim",
+      "name": "Taksim",
+      "district": "Beyoğlu",
+      "lat": 41.0369,
+      "lon": 28.985,
+      "role": "hub",
+      "officialLines": [
+        "M2"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "mecidiyekoy",
+      "name": "Şişli-Mecidiyeköy",
+      "district": "Şişli",
+      "lat": 41.0664,
+      "lon": 28.993,
+      "role": "hub",
+      "officialLines": [
+        "M2",
+        "M7"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "gayrettepe",
+      "name": "Gayrettepe",
+      "district": "Beşiktaş",
+      "lat": 41.0655,
+      "lon": 29.005,
+      "role": "hub",
+      "officialLines": [
+        "M2",
+        "M11"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "levent",
+      "name": "Levent",
+      "district": "Beşiktaş",
+      "lat": 41.081,
+      "lon": 29.0115,
+      "role": "hub",
+      "officialLines": [
+        "M2",
+        "M6"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "uskudar",
+      "name": "Üsküdar",
+      "district": "Üsküdar",
+      "lat": 41.0265,
+      "lon": 29.0151,
+      "role": "hub",
+      "officialLines": [
+        "M5"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "altunizade",
+      "name": "Altunizade",
+      "district": "Üsküdar",
+      "lat": 41.0218,
+      "lon": 29.0435,
+      "role": "hub",
+      "officialLines": [
+        "M5"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "dudullu",
+      "name": "Dudullu",
+      "district": "Ümraniye",
+      "lat": 41.0169,
+      "lon": 29.1617,
+      "role": "hub",
+      "officialLines": [
+        "M5",
+        "M8"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "kadikoy",
+      "name": "Kadıköy",
+      "district": "Kadıköy",
+      "lat": 40.9909,
+      "lon": 29.0233,
+      "role": "hub",
+      "officialLines": [
+        "M4"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "ayrilikcesmesi",
+      "name": "Ayrılık Çeşmesi",
+      "district": "Kadıköy",
+      "lat": 40.9984,
+      "lon": 29.0394,
+      "role": "hub",
+      "officialLines": [
+        "M4"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "kozyatagi",
+      "name": "Kozyatağı",
+      "district": "Kadıköy",
+      "lat": 40.9686,
+      "lon": 29.1008,
+      "role": "hub",
+      "officialLines": [
+        "M4",
+        "M8"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "bostanci",
+      "name": "Bostancı",
+      "district": "Kadıköy",
+      "lat": 40.9585,
+      "lon": 29.0965,
+      "role": "hub",
+      "officialLines": [
+        "M4",
+        "M8"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "kartal",
+      "name": "Kartal",
+      "district": "Kartal",
+      "lat": 40.8882,
+      "lon": 29.1856,
+      "role": "station",
+      "officialLines": [
+        "M4"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "pendik",
+      "name": "Pendik",
+      "district": "Pendik",
+      "lat": 40.88,
+      "lon": 29.2316,
+      "role": "hub",
+      "officialLines": [
+        "M4"
+      ],
+      "coordinateStatus": "seed"
+    },
+    {
+      "id": "sabiha",
+      "name": "Sabiha Gökçen Havalimanı",
+      "district": "Pendik",
+      "lat": 40.8983,
+      "lon": 29.3092,
+      "role": "terminal",
+      "officialLines": [
+        "M4"
+      ],
+      "coordinateStatus": "seed"
+    }
   ],
   "tutorialUnlocks": {
-    "IST-01":["yenikapi","taksim"],
-    "IST-02":["yenikapi","taksim","mecidiyekoy"],
-    "IST-03":["yenikapi","taksim","mecidiyekoy","gayrettepe"],
-    "IST-04":["yenikapi","taksim","mecidiyekoy","uskudar"],
-    "IST-05":["yenikapi","taksim","mecidiyekoy","uskudar","altunizade"]
+    "IST-01": [
+      "yenikapi",
+      "taksim"
+    ],
+    "IST-02": [
+      "yenikapi",
+      "taksim",
+      "mecidiyekoy"
+    ],
+    "IST-03": [
+      "yenikapi",
+      "taksim",
+      "mecidiyekoy",
+      "gayrettepe"
+    ],
+    "IST-04": [
+      "yenikapi",
+      "taksim",
+      "mecidiyekoy",
+      "uskudar"
+    ],
+    "IST-05": [
+      "yenikapi",
+      "taksim",
+      "mecidiyekoy",
+      "uskudar",
+      "altunizade"
+    ]
   },
   "tutorialGeography": {
-    "IST-01":"M2 corridor anchors: Yenikapı ↔ Taksim",
-    "IST-02":"M2 corridor extension toward Şişli-Mecidiyeköy",
-    "IST-03":"M2 corridor extension toward Gayrettepe",
-    "IST-04":"First cross-Bosphorus construction challenge using real Yenikapı/Üsküdar geographic anchors",
-    "IST-05":"Asian-side expansion toward Altunizade and first transfer-hub lesson"
+    "IST-01": "M2 corridor anchors: Yenikapı ↔ Taksim",
+    "IST-02": "M2 corridor extension toward Şişli-Mecidiyeköy",
+    "IST-03": "M2 corridor extension toward Gayrettepe",
+    "IST-04": "First cross-Bosphorus construction challenge using real Yenikapı/Üsküdar geographic anchors",
+    "IST-05": "Asian-side expansion toward Altunizade and first transfer-hub lesson"
   }
 }
