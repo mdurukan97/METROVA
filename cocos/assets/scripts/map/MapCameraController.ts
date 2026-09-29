@@ -33,6 +33,8 @@ export class MapCameraController extends Component {
   }
 
   private onTouchMove(event:EventTouch) {
+    const builder:any=this.node.getComponent('LineBuildController');
+    if(builder?.isBuildingLine?.())return;
     const touches = event.getAllTouches();
     if (touches.length >= 2) {
       this.panning = false;
