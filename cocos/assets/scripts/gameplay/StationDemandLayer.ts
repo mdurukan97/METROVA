@@ -13,7 +13,7 @@ export class StationDemandLayer extends Component {
   private stations=new Map<string,StationAnchor>();
 
   start(){
-    this.g=this.getComponent(Graphics)??this.addComponent(Graphics);
+    this.g=(this.getComponent(Graphics)??this.addComponent(Graphics))!;
     resources.load('data/istanbul-atlas',JsonAsset,(err,asset)=>{
       if(err)return;
       const atlas=asset.json as any;
