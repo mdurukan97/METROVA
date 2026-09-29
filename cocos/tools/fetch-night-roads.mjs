@@ -53,10 +53,26 @@ out geom qt;`;
   }
 }
 roads.sort((a,b)=>a.tier-b.tier);
+const bounds={west:28.82,east:29.34,south:40.84,north:41.13};
+const quantization=100000;
+// Mobile schema: [tier,[x0,y0,dx1,dy1,...]]. Names/highway tags are intentionally
+// removed because the renderer never uses them. Geographic precision stays ~1.1 m.
+const packed=roads.map(r=>{
+  const coords=[];let px=0,py=0;
+  for(let i=0;i<r.points.length;i++){
+    const x=Math.round((r.points[i][0]-bounds.west)*quantization);
+    const y=Math.round((r.points[i][1]-bounds.south)*quantization);
+    if(i===0)coords.push(x,y);else coords.push(x-px,y-py);
+    px=x;py=y;
+  }
+  return [r.tier,coords];
+});
 await writeFile('assets/data/istanbul-night-roads.json',JSON.stringify({
-  schemaVersion:1,
+  schemaVersion:2,
   attribution:'© OpenStreetMap contributors · ODbL',
-  bounds:{west:28.82,east:29.34,south:40.84,north:41.13},
-  roads
+  bounds,
+  quantization,
+  roadCount:roads.length,
+  roads:packed
 }));
-console.log(`Wrote ${roads.length} simplified road ways for the Istanbul→Pendik night atlas.`);
+console.log(`Wrote ${roads.length} packed road ways for the Istanbul→Pendik night atlas.`);
