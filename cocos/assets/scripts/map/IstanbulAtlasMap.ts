@@ -1,5 +1,6 @@
 import { _decorator, Color, Component, Graphics, JsonAsset, Label, Node, resources, UITransform, Vec2 } from 'cc';
 import { GeoProjector } from './GeoProjector';
+import { ISTANBUL_GAMEPLAY_BOUNDS } from './MapProjectionConfig';
 const { ccclass } = _decorator;
 
 type Station = {
@@ -39,7 +40,7 @@ export class IstanbulAtlasMap extends Component {
     if(!this.atlas) return new Vec2();
     const ui=this.getComponent(UITransform);
     if(!ui) throw new Error('IstanbulAtlasMap requires UITransform');
-    return new GeoProjector(this.atlas.map.bounds).project(lat,lon,ui.contentSize);
+    return new GeoProjector(ISTANBUL_GAMEPLAY_BOUNDS).project(lat,lon,ui.contentSize);
   }
 
   redraw() {
