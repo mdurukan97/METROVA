@@ -19,6 +19,10 @@
     "atlas:roads": "node tools/fetch-night-roads.mjs",
     "atlas:night": "npm run atlas:fetch && npm run atlas:m4 && npm run atlas:m4:merge && npm run atlas:roads && npm run atlas:validate",
     "atlas:m4:merge": "node tools/merge-m4-atlas.mjs",
-    "test": "tsx --test tests/gameplay.test.ts"
-  }
+    "test": "tsx --test tests/gameplay.test.ts",
+    "runtime:sync": "node tools/sync-runtime-data.mjs",
+    "runtime:prepare": "npm run atlas:night && npm run runtime:sync"
+  },
+  "type": "2d",
+  "uuid": "f4aa64a7-2e2c-4b8e-a2f2-c59b7085cb8e"
 }
