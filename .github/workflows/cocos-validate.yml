@@ -25,6 +25,8 @@ jobs:
         run: npm run atlas:night
       - name: Type-check TypeScript
         run: npx tsc --noEmit
+      - name: Run gameplay model tests
+        run: npm test
       - name: Verify atlas integrity
         run: |
           node -e "const fs=require('fs');const g=JSON.parse(fs.readFileSync('assets/data/istanbul-district-geometry.json','utf8'));const a=JSON.parse(fs.readFileSync('assets/data/istanbul-atlas.json','utf8'));const m4=a.stations.filter(s=>s.officialLines&&s.officialLines.includes('M4'));if(g.features.length!==39)throw new Error('District count '+g.features.length);if(m4.length!==23)throw new Error('M4 station count '+m4.length);if(!m4.some(s=>s.name==='Pendik'&&s.coordinateStatus==='verified'))throw new Error('Pendik is not verified');console.log('Districts:',g.features.length,'M4:',m4.length,'Pendik: verified')"
