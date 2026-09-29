@@ -2,6 +2,15 @@ import { BosphorusRule } from './BosphorusRule';
 import { GeoMath } from './GeoMath';
 import { BuiltLine, BuiltSegment, StationAnchor, TrainState } from './TransitTypes';
 
+export type NetworkSnapshot={
+  budgetM:number;
+  lines:BuiltLine[];
+  trains:TrainState[];
+  lineSeq:number;
+  segmentSeq:number;
+  trainSeq:number;
+};
+
 export class NetworkModel {
   readonly lines:BuiltLine[]=[];
   readonly trains:TrainState[]=[];
@@ -12,6 +21,26 @@ export class NetworkModel {
   private trainSeq=1;
 
   constructor(private readonly stations:Map<string,StationAnchor>){}
+
+  snapshot():NetworkSnapshot{
+    return {
+      budgetM:this.budgetM,
+      lines:structuredClone(this.lines),
+      trains:structuredClone(this.trains),
+      lineSeq:this.lineSeq,
+      segmentSeq:this.segmentSeq,
+      trainSeq:this.trainSeq
+    };
+  }
+
+  restore(snapshot:NetworkSnapshot){
+    this.budgetM=snapshot.budgetM;
+    this.lines.splice(0,this.lines.length,...structuredClone(snapshot.lines));
+    this.trains.splice(0,this.trains.length,...structuredClone(snapshot.trains));
+    this.lineSeq=snapshot.lineSeq;
+    this.segmentSeq=snapshot.segmentSeq;
+    this.trainSeq=snapshot.trainSeq;
+  }
 
   canExtend(lineId:string,stationId:string){
     const line=this.lines.find(l=>l.id===lineId);
