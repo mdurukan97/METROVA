@@ -1,5 +1,6 @@
 import { _decorator, Color, Component, JsonAsset, Label, Node, resources, UITransform } from 'cc';
 import { GeoProjector } from './GeoProjector';
+import { ISTANBUL_GAMEPLAY_BOUNDS } from './MapProjectionConfig';
 const { ccclass, property } = _decorator;
 
 type Ring=number[][];
@@ -16,7 +17,7 @@ export class IstanbulDistrictLabels extends Component {
   @property detailZoom=1.35;
 
   private labels:{node:Node;priority:boolean}[]=[];
-  private projector=new GeoProjector({west:27.95,east:30.02,south:40.74,north:41.62});
+  private projector=new GeoProjector(ISTANBUL_GAMEPLAY_BOUNDS);
   private priority=new Set(['Fatih','Beyoğlu','Şişli','Beşiktaş','Üsküdar','Kadıköy']);
 
   start(){
