@@ -24,6 +24,14 @@ function M.to_design_x(x)
     return x / SX
 end
 
+function M.set_position(node, p)
+    gui.set_position(node, vmath.vector3(tx(p.x), p.y, p.z or 0))
+end
+
+function M.design_angle(a, b)
+    return geom.atan2(b.y - a.y, (b.x - a.x) * SX)
+end
+
 function M.clear(ctx)
     if not ctx.nodes then
         ctx.nodes = {}
