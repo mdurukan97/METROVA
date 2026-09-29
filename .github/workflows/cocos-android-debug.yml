@@ -1,6 +1,10 @@
 name: Cocos Android Debug APK
 
 on:
+  push:
+    branches: [cocos-rewrite]
+    paths:
+      - '.github/workflows/cocos-android-debug.yml'
   workflow_run:
     workflows: ["Validate Cocos Rewrite"]
     types: [completed]
@@ -13,7 +17,7 @@ concurrency:
 
 jobs:
   android-debug:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: windows-latest
     timeout-minutes: 60
     steps:
@@ -30,13 +34,18 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Install Android 35 and NDK
+      - name: Install Cocos-compatible Android NDK
         shell: pwsh
         run: |
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;28.0.13004108" "cmake;3.22.1"
-          $ndk=Join-Path $env:ANDROID_SDK_ROOT "ndk\28.0.13004108"
+          $sdkmanager=(Get-Command sdkmanager.bat -ErrorAction SilentlyContinue).Source
+          if (!$sdkmanager) {
+            $sdkmanager=Get-ChildItem "$env:ANDROID_SDK_ROOT\cmdline-tools" -Recurse -Filter sdkmanager.bat | Select-Object -First 1 -ExpandProperty FullName
+          }
+          if (!$sdkmanager) { throw "sdkmanager.bat not found in the GitHub Windows Android SDK." }
+          & $sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;23.2.8568313"
+          if ($LASTEXITCODE -ne 0) { throw "sdkmanager failed with exit code $LASTEXITCODE" }
+          $ndk=Join-Path $env:ANDROID_SDK_ROOT "ndk\23.2.8568313"
+          if (!(Test-Path $ndk)) { throw "Android NDK r23c was not installed at $ndk" }
           "ANDROID_NDK_HOME=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "NDK_ROOT=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
@@ -48,6 +57,17 @@ jobs:
           path: cocos/assets/data
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Download last successful packed atlas on direct branch build
+        if: ${{ github.event_name == 'push' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          Remove-Item "cocos/assets/data/istanbul-atlas.json" -ErrorAction SilentlyContinue
+          Remove-Item "cocos/assets/data/istanbul-district-geometry.json" -ErrorAction SilentlyContinue
+          Remove-Item "cocos/assets/data/istanbul-night-roads.json" -ErrorAction SilentlyContinue
+          gh run download 36505575216 --repo ${{ github.repository }} -n istanbul-night-atlas -D cocos/assets/data
 
       - name: Prepare runtime
         shell: pwsh
