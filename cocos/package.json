@@ -12,6 +12,7 @@
   },
   "scripts": {
     "atlas:fetch": "node tools/fetch-istanbul-atlas.mjs",
-    "atlas:validate": "node tools/validate-station-districts.mjs"
+    "atlas:validate": "node tools/validate-station-districts.mjs",
+    "atlas:m4": "node tools/fetch-m4-stations.mjs"
   }
 }
