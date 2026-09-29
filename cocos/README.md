@@ -59,3 +59,10 @@ IST-01 now has a runtime objective controller instead of being only static level
 The M4 atlas pipeline now requires 23 verified station anchors and generates a developer-only Kadıköy→Pendik sandbox from those verified coordinates. This sandbox is explicitly outside campaign progression so it cannot bypass the locked IST-01–25 structure.
 
 Gameplay model tests cover IST-01 completion, Europe→Asia tunnel classification and snapshot/undo restoration.
+
+
+## Main menu quality pass
+
+The app shell now boots into a dedicated main-menu state instead of running gameplay underneath the menu. The menu uses an animated schematic network with moving train lights, a high-contrast METROVA hero area, a primary Continue action, Career/Garage/Skills/Market cards, active Istanbul progress, profile/Metro Coin status, settings access and a daily mission card. UI panels use restrained glass surfaces, consistent radii and press-scale feedback.
+
+`AppShellBootstrap` owns the Menu → Gameplay transition. Attach it to the root Canvas for the current vertical slice; `startInGameplay` remains available for developer iteration.
