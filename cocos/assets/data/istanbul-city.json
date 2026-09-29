@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "istanbul",
+  "displayName": "İstanbul",
+  "levelDataAsset": "data/istanbul-levels",
+  "startingMetroCoin": 600,
+  "minimumStarsForNextCity": 45,
+  "acts": [
+    {"id":"IST-ACT-1","order":1,"levelIds":["IST-01","IST-02","IST-03","IST-04","IST-05"],"finalLevelId":"IST-05"},
+    {"id":"IST-ACT-2","order":2,"levelIds":["IST-06","IST-07","IST-08","IST-09","IST-10"],"finalLevelId":"IST-10"},
+    {"id":"IST-ACT-3","order":3,"levelIds":["IST-11","IST-12","IST-13","IST-14","IST-15"],"finalLevelId":"IST-15"},
+    {"id":"IST-ACT-4","order":4,"levelIds":["IST-16","IST-17","IST-18","IST-19","IST-20"],"finalLevelId":"IST-20"},
+    {"id":"IST-ACT-5","order":5,"levelIds":["IST-21","IST-22","IST-23","IST-24","IST-25"],"finalLevelId":"IST-25"}
+  ],
+  "specialOperationSlots": [
+    {"id":"MARMARA-SLOT-1","unlockedByLevelId":"IST-05","requiredCityIds":["istanbul","bursa"]},
+    {"id":"MARMARA-SLOT-2","unlockedByLevelId":"IST-10","requiredCityIds":["istanbul","kocaeli"]},
+    {"id":"MARMARA-SLOT-3","unlockedByLevelId":"IST-15","requiredCityIds":["istanbul","sakarya"]},
+    {"id":"MARMARA-SLOT-4","unlockedByLevelId":"IST-20","requiredCityIds":["istanbul","tekirdag"]},
+    {"id":"MARMARA-SLOT-5","unlockedByLevelId":"IST-25","requiredCityIds":["istanbul","bursa","kocaeli"]}
+  ]
+}
