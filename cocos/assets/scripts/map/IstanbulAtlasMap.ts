@@ -21,7 +21,7 @@ export class IstanbulAtlasMap extends Component {
   private labels!:Node;
 
   start() {
-    this.graphics=this.getComponent(Graphics) ?? this.addComponent(Graphics);
+    this.graphics=(this.getComponent(Graphics) ?? this.addComponent(Graphics))!;
     this.labels=new Node('StationLabels');
     this.node.addChild(this.labels);
     resources.load('data/istanbul-atlas', JsonAsset, (err,asset)=>{
