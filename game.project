@@ -9,7 +9,7 @@ main_collection = /main/main.collectionc
 game_binding = /input/game.input_bindingc
 
 [display]
-width = 1600
+width = 1980
 height = 900
 high_dpi = 1
 vsync = 1
