@@ -2,9 +2,26 @@ local geom = require "core.geom"
 
 local M = {}
 
+local DESIGN_W = 1600
+local OUTPUT_W = 1980
+local SX = OUTPUT_W / DESIGN_W
+local FONT_SCALE = 0.34
+
+local function tx(x)
+    return x * SX
+end
+
 local function register(ctx, node)
     table.insert(ctx.nodes, node)
     return node
+end
+
+function M.x_scale()
+    return SX
+end
+
+function M.to_design_x(x)
+    return x / SX
 end
 
 function M.clear(ctx)
@@ -13,16 +30,13 @@ function M.clear(ctx)
         return
     end
     for i = #ctx.nodes, 1, -1 do
-        local node = ctx.nodes[i]
-        pcall(gui.delete_node, node)
+        pcall(gui.delete_node, ctx.nodes[i])
     end
     ctx.nodes = {}
 end
 
 function M.remove(ctx, node)
-    if not node then
-        return
-    end
+    if not node then return end
     pcall(gui.delete_node, node)
     for i = #ctx.nodes, 1, -1 do
         if ctx.nodes[i] == node then
@@ -33,45 +47,49 @@ function M.remove(ctx, node)
 end
 
 function M.box(ctx, x, y, w, h, color)
-    local node = gui.new_box_node(vmath.vector3(x, y, 0), vmath.vector3(w, h, 0))
+    local node = gui.new_box_node(vmath.vector3(tx(x), y, 0), vmath.vector3(w * SX, h, 0))
     gui.set_color(node, color)
     return register(ctx, node)
 end
 
 function M.circle(ctx, x, y, diameter, color)
-    local node = gui.new_pie_node(vmath.vector3(x, y, 0), vmath.vector3(diameter, diameter, 0))
+    local node = gui.new_pie_node(vmath.vector3(tx(x), y, 0), vmath.vector3(diameter, diameter, 0))
     gui.set_color(node, color)
     return register(ctx, node)
 end
 
 function M.text(ctx, x, y, text, scale, color, pivot)
-    local node = gui.new_text_node(vmath.vector3(x, y, 0), text)
-    gui.set_font(node, "default")
+    local node = gui.new_text_node(vmath.vector3(tx(x), y, 0), text)
+    gui.set_font(node, "ui")
     gui.set_color(node, color)
-    gui.set_scale(node, vmath.vector3(scale or 1, scale or 1, 1))
+    local s = (scale or 1) * FONT_SCALE
+    gui.set_scale(node, vmath.vector3(s, s, 1))
     gui.set_pivot(node, pivot or gui.PIVOT_W)
     return register(ctx, node)
 end
 
 function M.line(ctx, a, b, thickness, color)
-    local dx = b.x - a.x
+    local ax, bx = tx(a.x), tx(b.x)
+    local dx = bx - ax
     local dy = b.y - a.y
     local length = math.sqrt(dx * dx + dy * dy)
-    local cx = (a.x + b.x) * 0.5
+    local cx = (ax + bx) * 0.5
     local cy = (a.y + b.y) * 0.5
-    local node = M.box(ctx, cx, cy, length, thickness, color)
+    local node = gui.new_box_node(vmath.vector3(cx, cy, 0), vmath.vector3(length, thickness, 0))
+    gui.set_color(node, color)
     gui.set_rotation(node, vmath.quat_rotation_z(geom.atan2(dy, dx)))
-    return node
+    return register(ctx, node)
 end
 
 function M.neon_line(ctx, a, b, thickness, color, glow_color)
-    local glow = M.line(ctx, a, b, thickness * 3.1, glow_color)
+    local glow = M.line(ctx, a, b, thickness * 3.4, glow_color)
+    local mid = M.line(ctx, a, b, thickness * 1.7, vmath.vector4(color.x, color.y, color.z, 0.28))
     local core = M.line(ctx, a, b, thickness, color)
-    return glow, core
+    return glow, mid, core
 end
 
 function M.panel(ctx, x, y, w, h, fill, border)
-    M.box(ctx, x, y, w + 4, h + 4, border)
+    M.box(ctx, x, y, w + 4 / SX, h + 4, border)
     return M.box(ctx, x, y, w, h, fill)
 end
 
