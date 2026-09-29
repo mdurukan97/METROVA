@@ -12,6 +12,7 @@ import { TrainVisualLayer } from './TrainVisualLayer';
 import { NightHudBuilder } from './NightHudBuilder';
 import { RouteCameraDirector } from './RouteCameraDirector';
 import { LevelRuntimeController } from './LevelRuntimeController';
+import { DevPendikScenarioController } from './DevPendikScenarioController';
 const { ccclass } = _decorator;
 
 @ccclass('NightGameplayBootstrap')
@@ -66,6 +67,11 @@ export class NightGameplayBootstrap extends Component {
     level.builder=builder;
     level.levelId='IST-01';
     hud.levelRuntime=level;
+
+    const pendik=this.node.addComponent(DevPendikScenarioController)!;
+    pendik.builder=builder;
+    pendik.cameraDirector=director;
+    pendik.enabledOnStart=false;
   }
 
   private layer<T extends Component>(parent:Node,name:string,type:new()=>T):T{
