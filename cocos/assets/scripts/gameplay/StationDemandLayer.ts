@@ -2,6 +2,7 @@ import { _decorator, Color, Component, Graphics, JsonAsset, resources, UITransfo
 import { GeoProjector } from '../map/GeoProjector';
 import { LineBuildController } from './LineBuildController';
 import { StationAnchor } from './TransitTypes';
+import { ISTANBUL_GAMEPLAY_BOUNDS } from '../map/MapProjectionConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('StationDemandLayer')
@@ -16,7 +17,7 @@ export class StationDemandLayer extends Component {
     resources.load('data/istanbul-atlas',JsonAsset,(err,asset)=>{
       if(err)return;
       const atlas=asset.json as any;
-      this.projector=new GeoProjector(atlas.map.bounds);
+      this.projector=new GeoProjector(ISTANBUL_GAMEPLAY_BOUNDS);
       for(const s of atlas.stations as StationAnchor[])this.stations.set(s.id,s);
     });
   }
