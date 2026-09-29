@@ -1,3 +1,4 @@
+import { fetchOverpassJson } from './overpass-fetch.mjs';
 import { writeFile } from 'node:fs/promises';
 
 const expected=[
@@ -16,13 +17,7 @@ const query=`[out:json][timeout:90];
 );
 out center tags;`;
 
-const response=await fetch('https://overpass-api.de/api/interpreter',{
-  method:'POST',
-  headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','User-Agent':'METROVA-atlas-builder/0.3'},
-  body:new URLSearchParams({data:query})
-});
-if(!response.ok)throw new Error(`Overpass request failed: ${response.status}`);
-const json=await response.json();
+const json=await fetchOverpassJson(query,'M4 station anchors','METROVA-atlas-builder/0.4');
 
 const normalize=s=>String(s??'').toLocaleLowerCase('tr-TR').replace(/[‐‑–—]/g,'-').replace(/\s+/g,' ').trim();
 const candidates=json.elements.map(e=>({
