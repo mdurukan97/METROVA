@@ -36,3 +36,18 @@ npx tsc --noEmit
 ```
 
 The old Godot implementation remains preserved on the `legacy-godot` branch.
+
+## Night Istanbul gameplay slice
+
+The active visual direction is now the approved cinematic night-metropolis atlas.
+
+- One shared geographic projection keeps district polygons, roads, station anchors, player lines, passenger demand and trains aligned.
+- Offline OSM road import covers the Bosphorus corridor through Kartal/Pendik with LOD tiers.
+- Warm road glow and procedural city-light points are generated from real road geometry.
+- Player line building supports terminal extension, new-line creation, tunnel pricing and station snapping.
+- Trains now have terminal reversal and arrival callbacks.
+- Passenger queues board/alight trains and drive live satisfaction/wait metrics.
+- HUD reads real budget, projected annual net, satisfaction and delivered passengers.
+- Context card reports selected line distance, tunnel distance, build cost and train count.
+- Camera supports 1x–4x zoom, pan clamping and route framing including a Kadıköy→Pendik corridor view.
+
