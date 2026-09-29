@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "istanbul-night-metropolis",
+  "camera": {
+    "projection": "geographic",
+    "defaultPitchDeg": 28,
+    "minZoom": 1.0,
+    "maxZoom": 4.0,
+    "campaignBounds": {"west":28.82,"east":29.30,"south":40.86,"north":41.13},
+    "eastFocus": {"west":28.98,"east":29.30,"south":40.86,"north":41.03}
+  },
+  "visual": {
+    "water":"#061A2C",
+    "land":"#101A1B",
+    "districtBorder":"#31434A",
+    "minorRoadGlow":"#B66B24",
+    "majorRoadGlow":"#FFB14B",
+    "buildingBase":"#172126",
+    "buildingWindowGlow":"#FFB75B",
+    "stationFill":"#F7F3E8",
+    "stationOutline":"#FFFFFF",
+    "tunnelDash":"#8BC8FF",
+    "nightBloom":true,
+    "waterReflection":true,
+    "buildingExtrusion":"2.5d"
+  },
+  "rules": {
+    "backgroundGeometry":"must derive from geographic data, never AI-generated geometry",
+    "stationAnchors":"must use verified latitude/longitude",
+    "metroLines":"player-built lines connect station anchors; no screen-space fake station placement",
+    "labels":"may offset for readability but must point to the true anchor",
+    "offline":"gameplay must not depend on live map servers",
+    "attribution":"Map data © OpenStreetMap contributors · ODbL"
+  }
+}
