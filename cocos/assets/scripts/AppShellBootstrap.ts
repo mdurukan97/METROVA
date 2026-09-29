@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, UITransform } from 'cc';
+import { _decorator, Component, Node, UITransform, UIOpacity, tween } from 'cc';
 import { MainMenuController } from './menu/MainMenuController';
 import { NightGameplayBootstrap } from './gameplay/NightGameplayBootstrap';
 const { ccclass, property } = _decorator;
@@ -25,13 +25,28 @@ export class AppShellBootstrap extends Component {
   }
 
   enterGameplay(){
-    this.menuRoot.active=false;
-    this.gameplayRoot.active=true;
+    if(!this.menuRoot.active){this.gameplayRoot.active=true;return;}
+    const menuOpacity=this.menuRoot.getComponent(UIOpacity)??this.menuRoot.addComponent(UIOpacity);
+    tween(menuOpacity).to(0.22,{opacity:0}).call(()=>{
+      this.menuRoot.active=false;
+      menuOpacity.opacity=255;
+      this.gameplayRoot.active=true;
+      const gameOpacity=this.gameplayRoot.getComponent(UIOpacity)??this.gameplayRoot.addComponent(UIOpacity);
+      gameOpacity.opacity=0;
+      tween(gameOpacity).to(0.32,{opacity:255}).start();
+    }).start();
   }
 
   enterMenu(){
-    this.gameplayRoot.active=false;
-    this.menuRoot.active=true;
+    const gameOpacity=this.gameplayRoot.getComponent(UIOpacity)??this.gameplayRoot.addComponent(UIOpacity);
+    tween(gameOpacity).to(0.20,{opacity:0}).call(()=>{
+      this.gameplayRoot.active=false;
+      gameOpacity.opacity=255;
+      this.menuRoot.active=true;
+      const menuOpacity=this.menuRoot.getComponent(UIOpacity)??this.menuRoot.addComponent(UIOpacity);
+      menuOpacity.opacity=0;
+      tween(menuOpacity).to(0.28,{opacity:255}).start();
+    }).start();
   }
 
   private fullNode(name:string){
