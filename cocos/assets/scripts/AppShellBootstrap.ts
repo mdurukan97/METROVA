@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, UITransform, UIOpacity, tween } from 'cc';
+import { _decorator, Component, Node, UITransform, UIOpacity, tween, view, ResolutionPolicy } from 'cc';
 import { MainMenuController } from './menu/MainMenuController';
 import { NightGameplayBootstrap } from './gameplay/NightGameplayBootstrap';
 const { ccclass, property } = _decorator;
@@ -10,6 +10,8 @@ export class AppShellBootstrap extends Component {
   private gameplayRoot!:Node;
 
   start(){
+    // Landscape-first: keep vertical scale stable and reveal extra map width on wide phones.
+    view.setDesignResolutionSize(1280,720,ResolutionPolicy.FIXED_HEIGHT);
     const ui=((this.getComponent(UITransform) ?? this.addComponent(UITransform))!)!;
     if(ui.contentSize.width<100)ui.setContentSize(1280,720);
 
