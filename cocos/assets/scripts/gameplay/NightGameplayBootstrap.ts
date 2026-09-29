@@ -10,6 +10,7 @@ import { LineBuildController } from './LineBuildController';
 import { StationDemandLayer } from './StationDemandLayer';
 import { TrainVisualLayer } from './TrainVisualLayer';
 import { NightHudBuilder } from './NightHudBuilder';
+import { RouteCameraDirector } from './RouteCameraDirector';
 const { ccclass } = _decorator;
 
 @ccclass('NightGameplayBootstrap')
@@ -49,6 +50,9 @@ export class NightGameplayBootstrap extends Component {
     camera.maxZoom=4;
     camera.panLimitX=980;
     camera.panLimitY=540;
+
+    const director=map.addComponent(RouteCameraDirector)!;
+    director.mapContent=map;
 
     const hudNode=new Node('HUD');
     const hudUi=hudNode.addComponent(UITransform)!;
