@@ -1,5 +1,6 @@
 import { _decorator, Color, Component, Graphics, JsonAsset, Node, resources, UITransform } from 'cc';
 import { GeoProjector } from './GeoProjector';
+import { ISTANBUL_GAMEPLAY_BOUNDS } from './MapProjectionConfig';
 const { ccclass, property } = _decorator;
 
 type Road={tier:number;highway:string;name:string;points:[number,number][]};
@@ -19,7 +20,7 @@ export class NightRoadLayer extends Component {
       if(err){console.error('[METROVA] night road atlas missing. Run npm run atlas:roads.',err);return;}
       const data=asset.json as RoadAsset;
       this.roads=data.roads;
-      this.projector=new GeoProjector(data.bounds);
+      this.projector=new GeoProjector(ISTANBUL_GAMEPLAY_BOUNDS);
       this.redraw(true);
     });
   }
