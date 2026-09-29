@@ -26,6 +26,14 @@ export class MainMenuController extends Component {
     this.cards.push(this.menuCard(20,-105,205,145,'YETENEKLER','Kalıcı geliştirmeler','◆','metrova:skills'));
     this.cards.push(this.menuCard(245,-105,205,145,'MARKET','Araçlar ve kozmetik','●','metrova:market'));
 
+    const daily=this.glassPanel(475,-112,250,132,18,new Color(5,18,29,232),new Color(41,77,101,205));
+    const dailyButton=daily.addComponent(Button)!;dailyButton.transition=Button.Transition.SCALE;dailyButton.zoomScale=0.97;
+    daily.on(Button.EventType.CLICK,()=>this.node.emit('metrova:daily'));
+    this.makeChildLabel(daily,-105,38,210,20,'GÜNLÜK GÖREV',10,new Color('#7894A7'));
+    this.makeChildLabel(daily,-105,6,210,28,'3 HAT KUR',18,new Color('#FFFFFF'));
+    this.makeChildLabel(daily,-105,-25,210,22,'Ödül  +75 Metro Coin',12,new Color('#F4D47A'));
+    this.progressBar(daily,0,-48,210,6,0.34);
+
     this.profilePill(495,300);
     this.iconButton(584,300,'⚙','metrova:settings');
 
@@ -56,6 +64,13 @@ export class MainMenuController extends Component {
     this.makeChildLabel(n,-w/2+18,-8,w-36,26,title,16,new Color('#FFFFFF'));
     this.makeChildLabel(n,-w/2+18,-37,w-36,24,sub,11,new Color('#839CAA'));
     return n;
+  }
+
+  private progressBar(parent:Node,x:number,y:number,w:number,h:number,value:number){
+    const bg=new Node('ProgressBg');bg.setPosition(x,y);const ui=bg.addComponent(UITransform)!;ui.setContentSize(w,h);
+    const g=bg.addComponent(Graphics)!;g.fillColor=new Color(30,54,68,235);g.roundRect(-w/2,-h/2,w,h,h/2);g.fill();parent.addChild(bg);
+    const fill=new Node('ProgressFill');fill.setPosition(-w*(1-value)/2,0);const fui=fill.addComponent(UITransform)!;fui.setContentSize(w*value,h);
+    const fg=fill.addComponent(Graphics)!;fg.fillColor=new Color('#2B8ED6');fg.roundRect(-w*value/2,-h/2,w*value,h,h/2);fg.fill();bg.addChild(fill);
   }
 
   private profilePill(x:number,y:number){
