@@ -15,7 +15,7 @@ export class NightCityLightLayer extends Component {
   private lastLod=-1;
 
   start(){
-    this.g=this.getComponent(Graphics)??this.addComponent(Graphics);
+    this.g=(this.getComponent(Graphics)??this.addComponent(Graphics))!;
     resources.load('data/istanbul-night-roads',JsonAsset,(err,asset)=>{
       if(err)return;
       const data=asset.json as RoadAsset;
