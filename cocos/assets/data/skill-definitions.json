@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "skills": [
+    {"id":"vehicle-capacity","displayName":"Kapasite","branch":"vehicle-technology","unlockPhase":1,"maxRank":5,"rankCostsSp":[1,2,3,3,3],"effect":{"stat":"baseCapacity","mode":"add","perRank":2},"prerequisites":[]},
+    {"id":"vehicle-fleet","displayName":"Filo","branch":"vehicle-technology","unlockPhase":1,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"maxTrainsPerLine","mode":"add","perRank":1},"prerequisites":[{"skillId":"vehicle-capacity","minRank":2}]},
+
+    {"id":"operations-signal","displayName":"Sinyal","branch":"operations","unlockPhase":1,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"minimumHeadway","mode":"multiply","atMaxRank":0.85},"prerequisites":[]},
+    {"id":"operations-dwell","displayName":"Dwell","branch":"operations","unlockPhase":2,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"stationDwell","mode":"multiply","atMaxRank":0.85},"prerequisites":[{"skillId":"operations-signal","minRank":1}]},
+    {"id":"operations-auto-balance","displayName":"Otomatik Dengeleme","branch":"operations","unlockPhase":3,"maxRank":1,"rankCostsSp":[1],"effect":{"stat":"catchUpBehavior","mode":"unlock"},"prerequisites":[{"skillId":"operations-dwell","minRank":3}]},
+
+    {"id":"finance-ticket","displayName":"Bilet","branch":"finance","unlockPhase":2,"maxRank":4,"rankCostsSp":[1,2,3,3],"effect":{"stat":"passengerRevenue","mode":"multiply","perRank":0.08},"prerequisites":[]},
+    {"id":"finance-maintenance","displayName":"Bakım","branch":"finance","unlockPhase":2,"maxRank":4,"rankCostsSp":[1,2,3,3],"effect":{"stat":"operatingCost","mode":"multiply","perRank":-0.06},"prerequisites":[{"skillId":"finance-ticket","minRank":1}]},
+    {"id":"finance-refund","displayName":"Yatırım İadesi","branch":"finance","unlockPhase":3,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"demolitionRefund","mode":"add"},"prerequisites":[{"skillId":"finance-maintenance","minRank":2}]},
+
+    {"id":"infrastructure-tunnel","displayName":"Tünel Mühendisliği","branch":"infrastructure","unlockPhase":3,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"tunnelAdvantage","mode":"add"},"prerequisites":[]},
+    {"id":"infrastructure-transfer","displayName":"Aktarma","branch":"infrastructure","unlockPhase":2,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"transferCapacity","mode":"add"},"prerequisites":[{"skillId":"infrastructure-tunnel","minRank":1}]},
+    {"id":"infrastructure-main-hub","displayName":"Ana Gar","branch":"infrastructure","unlockPhase":3,"maxRank":1,"rankCostsSp":[1],"effect":{"stat":"mainHubUpgrade","mode":"unlock"},"prerequisites":[{"skillId":"infrastructure-transfer","minRank":2}]},
+
+    {"id":"passenger-patience","displayName":"Sabır","branch":"passenger","unlockPhase":2,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"abandonThreshold","mode":"add"},"prerequisites":[]},
+    {"id":"passenger-transfer-comfort","displayName":"Aktarma Konforu","branch":"passenger","unlockPhase":2,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"transferSatisfactionPenalty","mode":"multiply"},"prerequisites":[{"skillId":"passenger-patience","minRank":1}]},
+    {"id":"passenger-coverage","displayName":"Kapsama","branch":"passenger","unlockPhase":3,"maxRank":3,"rankCostsSp":[1,2,3],"effect":{"stat":"coverageBonus","mode":"add"},"prerequisites":[{"skillId":"passenger-transfer-comfort","minRank":2}]}
+  ]
+}

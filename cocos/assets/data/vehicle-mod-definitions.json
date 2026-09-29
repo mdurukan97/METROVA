@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "mods": [
+    {"id":"carriage","displayName":"Vagon","tierCostsCoin":[200,450,850],"tierThreeEffects":{"capacityAdd":12,"accelerationMultiplier":0.94,"maintenanceMultiplier":1.11}},
+    {"id":"motor","displayName":"Motor","tierCostsCoin":[250,550,950],"tierThreeEffects":{"speedMultiplier":1.12,"maintenanceMultiplier":1.10}},
+    {"id":"eco","displayName":"Eco","tierCostsCoin":[300,650,1100],"tierThreeEffects":{"maintenanceMultiplier":0.84,"speedMultiplier":0.94}},
+    {"id":"turnaround","displayName":"Turnaround","tierCostsCoin":[300,600,950],"tierThreeEffects":{"dwellMultiplier":0.85,"maintenanceMultiplier":1.10}}
+  ]
+}
