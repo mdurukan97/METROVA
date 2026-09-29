@@ -34,19 +34,27 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Select preinstalled Android NDK
+      - name: Select Cocos-compatible Android NDK r23
         shell: pwsh
         run: |
           $sdk=$env:ANDROID_SDK_ROOT
           if (!$sdk) { $sdk=$env:ANDROID_HOME }
           if (!$sdk) { throw "Android SDK path is not available on the GitHub runner." }
-          $ndkCandidates=Get-ChildItem (Join-Path $sdk "ndk") -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending
-          if (!$ndkCandidates) { throw "No preinstalled Android NDK found under $sdk\ndk." }
-          $preferred=$ndkCandidates | Where-Object { $_.Name -like "23.*" } | Select-Object -First 1
-          if (!$preferred) { $preferred=$ndkCandidates | Select-Object -First 1 }
-          $ndk=$preferred.FullName
+          $version="23.2.8568313"
+          $ndk=Join-Path $sdk "ndk/$version"
+          if (!(Test-Path $ndk)) {
+            $sdkmanager=Join-Path $sdk "cmdline-tools/latest/bin/sdkmanager.bat"
+            if (!(Test-Path $sdkmanager)) {
+              $sdkmanager=(Get-ChildItem (Join-Path $sdk "cmdline-tools") -Recurse -Filter sdkmanager.bat -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+            }
+            if (!$sdkmanager) { throw "sdkmanager.bat was not found under $sdk." }
+            Write-Host "Installing Cocos-compatible NDK $version..."
+            & $sdkmanager --install "ndk;$version" --sdk_root="$sdk"
+            if ($LASTEXITCODE -ne 0) { throw "NDK $version installation failed." }
+          }
+          if (!(Test-Path $ndk)) { throw "NDK $version is not available at $ndk." }
           Write-Host "Using Android SDK: $sdk"
-          Write-Host "Using preinstalled NDK: $ndk"
+          Write-Host "Using Android NDK: $ndk"
           "ANDROID_SDK_ROOT=$sdk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "ANDROID_NDK_HOME=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "NDK_ROOT=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -85,9 +93,18 @@ jobs:
           npx tsc --noEmit
           npm test
 
+      - name: Restore pinned Cocos CLI cache
+        id: cocos-cli-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/cocos-cli
+          key: cocos-cli-win-4aeaf59a7d7694a69e753ed7d2c649d98eb18134-minimal-v1
+
       - name: Build pinned Cocos CLI
+        if: steps.cocos-cli-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
+          Remove-Item "$env:RUNNER_TEMP/cocos-cli" -Recurse -Force -ErrorAction SilentlyContinue
           git clone --filter=blob:none https://github.com/cocos/cocos-cli.git "$env:RUNNER_TEMP/cocos-cli"
           Set-Location "$env:RUNNER_TEMP/cocos-cli"
           git checkout 4aeaf59a7d7694a69e753ed7d2c649d98eb18134
@@ -96,6 +113,13 @@ jobs:
           npm install
           node workflow/download-tools.js --minimal
           npm run build
+
+      - name: Save pinned Cocos CLI cache
+        if: steps.cocos-cli-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/cocos-cli
+          key: cocos-cli-win-4aeaf59a7d7694a69e753ed7d2c649d98eb18134-minimal-v1
 
       - name: Build Android native project
         shell: pwsh
