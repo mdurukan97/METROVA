@@ -2,7 +2,7 @@ name: Cocos Android Debug APK
 
 on:
   push:
-    branches: [cocos-rewrite]
+    branches: [main, cocos-rewrite]
     paths:
       - '.github/workflows/cocos-android-debug.yml'
   workflow_run:
@@ -34,18 +34,20 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Cocos-compatible Android NDK
+      - name: Select preinstalled Android NDK
         shell: pwsh
         run: |
-          $sdkmanager=(Get-Command sdkmanager.bat -ErrorAction SilentlyContinue).Source
-          if (!$sdkmanager) {
-            $sdkmanager=Get-ChildItem "$env:ANDROID_SDK_ROOT\cmdline-tools" -Recurse -Filter sdkmanager.bat | Select-Object -First 1 -ExpandProperty FullName
-          }
-          if (!$sdkmanager) { throw "sdkmanager.bat not found in the GitHub Windows Android SDK." }
-          & $sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;23.2.8568313"
-          if ($LASTEXITCODE -ne 0) { throw "sdkmanager failed with exit code $LASTEXITCODE" }
-          $ndk=Join-Path $env:ANDROID_SDK_ROOT "ndk\23.2.8568313"
-          if (!(Test-Path $ndk)) { throw "Android NDK r23c was not installed at $ndk" }
+          $sdk=$env:ANDROID_SDK_ROOT
+          if (!$sdk) { $sdk=$env:ANDROID_HOME }
+          if (!$sdk) { throw "Android SDK path is not available on the GitHub runner." }
+          $ndkCandidates=Get-ChildItem (Join-Path $sdk "ndk") -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending
+          if (!$ndkCandidates) { throw "No preinstalled Android NDK found under $sdk\ndk." }
+          $preferred=$ndkCandidates | Where-Object { $_.Name -like "23.*" } | Select-Object -First 1
+          if (!$preferred) { $preferred=$ndkCandidates | Select-Object -First 1 }
+          $ndk=$preferred.FullName
+          Write-Host "Using Android SDK: $sdk"
+          Write-Host "Using preinstalled NDK: $ndk"
+          "ANDROID_SDK_ROOT=$sdk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "ANDROID_NDK_HOME=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "NDK_ROOT=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
