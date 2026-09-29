@@ -51,3 +51,11 @@ The active visual direction is now the approved cinematic night-metropolis atlas
 - Context card reports selected line distance, tunnel distance, build cost and train count.
 - Camera supports 1x–4x zoom, pan clamping and route framing including a Kadıköy→Pendik corridor view.
 
+
+## Current playable loop work
+
+IST-01 now has a runtime objective controller instead of being only static level data. The live loop includes pause/planning mode, 1x/2x/3x simulation speeds, a six-second undo snapshot, build-cost/tunnel preview, level completion evaluation and an in-game result panel.
+
+The M4 atlas pipeline now requires 23 verified station anchors and generates a developer-only Kadıköy→Pendik sandbox from those verified coordinates. This sandbox is explicitly outside campaign progression so it cannot bypass the locked IST-01–25 structure.
+
+Gameplay model tests cover IST-01 completion, Europe→Asia tunnel classification and snapshot/undo restoration.
