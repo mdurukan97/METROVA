@@ -2,7 +2,7 @@ name: Cocos Android Debug APK
 
 on:
   push:
-    branches: [cocos-rewrite]
+    branches: [main, cocos-rewrite]
     paths:
       - '.github/workflows/cocos-android-debug.yml'
   workflow_run:
