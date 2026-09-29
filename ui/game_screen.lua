@@ -96,18 +96,51 @@ local function draw_rounded_polyline(ctx, points, width, color, glow_color)
     end
 end
 
+local function format_int(value)
+    local s = tostring(math.floor(value))
+    local out = s
+    while true do
+        local changed
+        out, changed = out:gsub("^(-?%d+)(%d%d%d)", "%1.%2")
+        if changed == 0 then break end
+    end
+    return out
+end
+
 local function add_city_texture(ctx)
-    math.randomseed(2909202603)
-    for i = 1, 280 do
+    math.randomseed(2909202605)
+
+    -- Distant city lights.
+    for i = 1, 210 do
         local x = math.random(105, 1535)
         local y = math.random(105, 785)
         local s = math.random(2, 4)
         local col = (i % 8 == 0) and C.city_light_cool or C.city_light
         ui.box(ctx, x, y, s, s, col)
     end
+
+    -- Compact illuminated urban clusters around the playable districts.
+    for index, src in ipairs(istanbul.stations) do
+        for j = 1, 5 do
+            local ox = math.random(-58, 58)
+            local oy = math.random(-38, 38)
+            local w = math.random(7, 18)
+            local h = math.random(4, 11)
+            ui.box(ctx, src.x + ox, src.y + oy, w, h,
+                vmath.vector4(0.055, 0.105, 0.14, 0.72))
+            if (index + j) % 2 == 0 then
+                ui.box(ctx, src.x + ox, src.y + oy, math.max(2, w * 0.42), 2,
+                    vmath.vector4(1.0, 0.62, 0.20, 0.35))
+            end
+        end
+    end
 end
 
 local function add_geography(ctx)
+    -- Marmara and Black Sea edges establish an actual city geography.
+    ui.box(ctx, 800, 36, 1600, 72, vmath.vector4(0.012, 0.085, 0.145, 0.96))
+    ui.box(ctx, 800, 790, 1600, 55, vmath.vector4(0.010, 0.070, 0.125, 0.92))
+
     -- Subtle metropolitan road skeleton.
     for _, road in ipairs(istanbul.roads) do
         draw_polyline(ctx, road, 1.4, vmath.vector4(0.22, 0.42, 0.58, 0.18))
@@ -134,6 +167,8 @@ local function add_geography(ctx)
     for i, bridge in ipairs(istanbul.bridges) do
         local color = (i == 1) and C.red or ((i == 2) and C.blue or C.orange)
         ui.neon_line(ctx, bridge.a, bridge.b, 3.0, color, vmath.vector4(color.x, color.y, color.z, 0.10))
+        ui.circle(ctx, bridge.a.x, bridge.a.y, 8, C.white)
+        ui.circle(ctx, bridge.b.x, bridge.b.y, 8, C.white)
     end
 
     for _, label in ipairs(istanbul.labels) do
@@ -159,8 +194,9 @@ local function add_hud(ctx)
     ctx.income_text = ui.text(ctx, 675, 842, "+TL 52.300 / yıl", 0.72, C.green, gui.PIVOT_W)
 
     ui.panel(ctx, 1052, 855, 190, 72, C.panel, C.border)
-    ctx.approval_text = ui.text(ctx, 970, 870, "Memnuniyet %74", 0.75, C.white, gui.PIVOT_W)
-    ctx.passenger_text = ui.text(ctx, 970, 842, "Yolcu 0", 0.66, C.cyan, gui.PIVOT_W)
+    ctx.approval_text = ui.text(ctx, 970, 873, "Memnuniyet %74", 0.72, C.white, gui.PIVOT_W)
+    ctx.passenger_text = ui.text(ctx, 970, 847, "Yolcu 0", 0.61, C.cyan, gui.PIVOT_W)
+    ctx.route_text = ui.text(ctx, 970, 825, "Hat 0", 0.55, C.muted, gui.PIVOT_W)
 
     ui.panel(ctx, 1322, 855, 290, 72, C.panel, C.border)
     ctx.date_text = ui.text(ctx, 1200, 858, "2028 / Nis", 0.80, C.white, gui.PIVOT_W)
@@ -186,14 +222,15 @@ local function add_hud(ctx)
     ui.text(ctx, 1195, 780, "YENİ YOLCU TALEBİ", 0.72, C.red, gui.PIVOT_W)
     ui.text(ctx, 1195, 748, "Kadıköy bölgesinde yoğunluk artıyor.", 0.62, C.muted, gui.PIVOT_W)
 
-    ui.panel(ctx, 320, 70, 480, 50, vmath.vector4(0.025, 0.085, 0.135, 0.92), C.border)
-    ui.text(ctx, 102, 70, "Hat: istasyondan sürükle  |  Harita: boş alanda sürükle  |  +/- yakınlaştır", 0.54, C.muted, gui.PIVOT_W)
+    ui.panel(ctx, 345, 70, 530, 50, vmath.vector4(0.025, 0.085, 0.135, 0.92), C.border)
+    ctx.hint_text = ui.text(ctx, 102, 70, "1. Bir istasyona basılı tut ve diğerine sürükle.", 0.55, C.muted, gui.PIVOT_W)
 end
 
 local function add_station_visual(ctx, station)
-    station.glow = ui.circle(ctx, station.pos.x, station.pos.y, 30, vmath.vector4(0.12, 0.55, 1.0, 0.15))
-    station.ring = ui.circle(ctx, station.pos.x, station.pos.y, 20, C.white)
-    station.core = ui.circle(ctx, station.pos.x, station.pos.y, 11, C.blue)
+    station.glow = ui.circle(ctx, station.pos.x, station.pos.y, 34, vmath.vector4(0.12, 0.55, 1.0, 0.12))
+    station.ring = ui.circle(ctx, station.pos.x, station.pos.y, 21, vmath.vector4(0.82, 0.93, 1.0, 0.95))
+    station.core = ui.circle(ctx, station.pos.x, station.pos.y, 12, C.blue)
+    station.active_color = nil
 
     local offset = LABEL_OFFSETS[station.id]
     local pivot
@@ -234,12 +271,11 @@ end
 local function orient_train(train)
     local a = train.route.stops[train.i]
     local b = train.route.stops[train.j]
-    gui.set_rotation(train.node, vmath.quat_rotation_z(ui.design_angle(a.pos, b.pos)))
+    gui.set_rotation(train.root, vmath.quat_rotation_z(ui.design_angle(a.pos, b.pos)))
 end
 
 local function create_route_train(ctx, route)
     local first = route.stops[1]
-    local second = route.stops[2]
     local color = theme.route_colors[route.color_index]
     local train = {
         route = route,
@@ -250,9 +286,22 @@ local function create_route_train(ctx, route)
         speed = 0.23 + (#ctx.trains % 3) * 0.025,
     }
 
-    train.glow = ui.circle(ctx, first.pos.x, first.pos.y, 24,
-        vmath.vector4(color.x, color.y, color.z, 0.18))
-    train.node = ui.box(ctx, first.pos.x, first.pos.y, 30, 11, color)
+    local map_parent = ctx.parent
+    train.root = ui.box(ctx, first.pos.x, first.pos.y, 1, 1, vmath.vector4(0, 0, 0, 0))
+    ui.set_parent(ctx, train.root)
+
+    train.glow = ui.circle(ctx, first.pos.x, first.pos.y, 30,
+        vmath.vector4(color.x, color.y, color.z, 0.15))
+    train.shadow = ui.box(ctx, first.pos.x + 1, first.pos.y - 3, 40, 17,
+        vmath.vector4(0, 0, 0, 0.42))
+    train.body = ui.box(ctx, first.pos.x, first.pos.y, 38, 14,
+        vmath.vector4(0.82, 0.90, 0.96, 1.0))
+    train.stripe = ui.box(ctx, first.pos.x, first.pos.y - 4, 34, 4, color)
+    train.window = ui.box(ctx, first.pos.x - 3, first.pos.y + 2, 20, 5,
+        vmath.vector4(0.035, 0.16, 0.24, 0.98))
+    train.light = ui.circle(ctx, first.pos.x + 17, first.pos.y, 5, C.gold)
+
+    ui.set_parent(ctx, map_parent)
     orient_train(train)
     table.insert(ctx.trains, train)
 end
@@ -292,9 +341,17 @@ local function append_station(ctx, station)
         return false
     end
 
-    network_system.add_edge(ctx.network, last.id, station.id, route.color_index)
+    local edge = network_system.add_edge(ctx.network, last.id, station.id, route.color_index)
+    if not edge then
+        return false
+    end
+
     local color = theme.route_colors[route.color_index]
     draw_route_segment(ctx, last, station, color)
+    last.active_color = color
+    station.active_color = color
+    gui.set_color(last.core, color)
+    gui.set_color(station.core, color)
     table.insert(route.stops, station)
     return true
 end
@@ -342,19 +399,62 @@ local function advance_train(train, amount)
     end
 end
 
+local function show_completion(ctx, connected)
+    if ctx.completed then return end
+    ctx.completed = true
+    ctx.simulation.paused = true
+    ctx.simulation.metro_coin = ctx.simulation.metro_coin + 250
+
+    local map_parent = ctx.parent
+    ui.set_parent(ctx, nil)
+
+    ui.box(ctx, 800, 450, 1600, 900, vmath.vector4(0.0, 0.015, 0.035, 0.72))
+    ui.panel(ctx, 800, 455, 560, 385, vmath.vector4(0.025, 0.085, 0.14, 0.985), C.cyan)
+    ui.text(ctx, 800, 575, "IST-01 TAMAMLANDI", 1.65, C.white, gui.PIVOT_CENTER)
+    ui.text(ctx, 800, 528, "İlk Hat", 0.92, C.cyan, gui.PIVOT_CENTER)
+    ui.box(ctx, 800, 497, 420, 2, vmath.vector4(0.25, 0.78, 1.0, 0.42))
+
+    ui.text(ctx, 650, 458, "Bağlı istasyon", 0.70, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 950, 458, tostring(connected), 0.88, C.white, gui.PIVOT_E)
+    ui.text(ctx, 650, 420, "Kurulan hat", 0.70, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 950, 420, tostring(#ctx.routes), 0.88, C.white, gui.PIVOT_E)
+    ui.text(ctx, 650, 382, "Taşınan yolcu", 0.70, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 950, 382, format_int(ctx.simulation.passengers), 0.88, C.white, gui.PIVOT_E)
+
+    ui.panel(ctx, 800, 325, 390, 62, vmath.vector4(0.06, 0.16, 0.20, 0.96), C.green)
+    ui.text(ctx, 690, 325, "BÖLÜM ÖDÜLÜ", 0.68, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 925, 325, "+250 Metro Coin", 0.92, C.gold, gui.PIVOT_E)
+
+    ctx.buttons.complete_home = ui.button(ctx, 800, 245, 300, 58,
+        "ANA MENÜYE DÖN", C.blue, C.cyan, C.white, 0.90)
+
+    ui.set_parent(ctx, map_parent)
+end
+
 local function update_hud(ctx)
     local connected = network_system.connected_count(ctx.network)
     if connected >= 5 then
         gui.set_text(ctx.goal_text, "HEDEF TAMAMLANDI  " .. connected .. "/5")
         gui.set_color(ctx.goal_text, C.green)
+        gui.set_text(ctx.hint_text, "Harika. İstanbul'daki ilk metro hattın çalışıyor.")
+        show_completion(ctx, connected)
     else
         gui.set_text(ctx.goal_text, "5 istasyonu bağla  " .. connected .. "/5")
         gui.set_color(ctx.goal_text, C.white)
+
+        if #ctx.routes == 0 then
+            gui.set_text(ctx.hint_text, "1. Bir istasyona basılı tut ve diğerine sürükle.")
+        elseif connected < 3 then
+            gui.set_text(ctx.hint_text, "2. Yeni hat çiz veya aynı sürüklemede birkaç durağı bağla.")
+        else
+            gui.set_text(ctx.hint_text, "3. Hedef için " .. math.max(0, 5 - connected) .. " istasyon daha bağla.")
+        end
     end
 
     local sim = ctx.simulation
-    gui.set_text(ctx.budget_text, string.format("TL  %d", math.floor(sim.budget)))
-    gui.set_text(ctx.passenger_text, string.format("Yolcu %d", math.floor(sim.passengers)))
+    gui.set_text(ctx.budget_text, "TL  " .. format_int(sim.budget))
+    gui.set_text(ctx.passenger_text, "Yolcu " .. format_int(sim.passengers))
+    gui.set_text(ctx.route_text, "Hat " .. tostring(#ctx.routes))
     gui.set_text(ctx.date_text, string.format("%d / %02d", sim.year, sim.month))
 end
 
@@ -372,6 +472,8 @@ function M.build(ctx)
     ctx.preview_nodes = nil
     ctx.pan_drag = nil
     ctx.hud_clock = 0
+    ctx.anim_clock = 0
+    ctx.completed = false
     ctx.camera = { zoom = 1.0, pan_x = 0, pan_y = 0 }
 
     ui.set_parent(ctx, nil)
@@ -407,6 +509,16 @@ end
 
 function M.update(ctx, dt)
     simulation_system.update(ctx.simulation, dt, #ctx.network.edges)
+    ctx.anim_clock = ctx.anim_clock + dt
+
+    for index, station in ipairs(ctx.stations) do
+        local pulse = 1.0 + 0.10 * math.sin(ctx.anim_clock * 2.5 + index * 0.55)
+        gui.set_scale(station.glow, vmath.vector3(pulse, pulse, 1))
+        if station.active_color then
+            local color = station.active_color
+            gui.set_color(station.glow, vmath.vector4(color.x, color.y, color.z, 0.16 + 0.06 * (pulse - 0.9)))
+        end
+    end
 
     if not ctx.simulation.paused then
         local speed = ctx.simulation.speed
@@ -415,8 +527,7 @@ function M.update(ctx, dt)
             local a = train.route.stops[train.i]
             local b = train.route.stops[train.j]
             local pos = geom.lerp(a.pos, b.pos, train.t)
-            ui.set_map_position(train.node, pos)
-            ui.set_map_position(train.glow, pos)
+            ui.set_map_position(train.root, pos)
         end
     end
 
@@ -428,6 +539,13 @@ function M.update(ctx, dt)
 end
 
 function M.on_input(ctx, action)
+    if ctx.completed then
+        if action.released and ui.hit(ctx.buttons.complete_home, action.x, action.y) then
+            return "home"
+        end
+        return nil
+    end
+
     if action.released and ui.hit(ctx.buttons.home, action.x, action.y) then
         delete_preview(ctx)
         ctx.route_draft = nil

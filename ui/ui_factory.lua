@@ -115,7 +115,10 @@ end
 
 function M.panel(ctx, x, y, w, h, fill, border)
     M.box(ctx, x, y, w + 4 / SX, h + 4, border)
-    return M.box(ctx, x, y, w, h, fill)
+    local panel = M.box(ctx, x, y, w, h, fill)
+    -- Thin internal highlight gives flat GUI rectangles a glass-panel read.
+    M.box(ctx, x, y + h * 0.5 - 1.5, math.max(1, w - 6), 2, vmath.vector4(0.46, 0.76, 1.0, 0.10))
+    return panel
 end
 
 function M.button(ctx, x, y, w, h, label, fill, border, text_color, scale)

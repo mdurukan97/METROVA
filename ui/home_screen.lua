@@ -66,6 +66,43 @@ local function add_bridge(ctx)
     end
 end
 
+local function add_network_ribbon(ctx)
+    local lines = {
+        {
+            color = C.blue,
+            points = {
+                vmath.vector3(620, 720, 0), vmath.vector3(760, 735, 0),
+                vmath.vector3(900, 725, 0), vmath.vector3(1035, 748, 0),
+            }
+        },
+        {
+            color = C.orange,
+            points = {
+                vmath.vector3(720, 690, 0), vmath.vector3(850, 705, 0),
+                vmath.vector3(980, 695, 0), vmath.vector3(1115, 718, 0),
+            }
+        },
+        {
+            color = C.magenta,
+            points = {
+                vmath.vector3(1050, 680, 0), vmath.vector3(1170, 705, 0),
+                vmath.vector3(1280, 695, 0), vmath.vector3(1390, 720, 0),
+            }
+        },
+    }
+
+    for _, route in ipairs(lines) do
+        for i = 1, #route.points - 1 do
+            ui.neon_line(ctx, route.points[i], route.points[i + 1], 2.2, route.color,
+                vmath.vector4(route.color.x, route.color.y, route.color.z, 0.10))
+        end
+        for _, p in ipairs(route.points) do
+            ui.circle(ctx, p.x, p.y, 8, C.white)
+            ui.circle(ctx, p.x, p.y, 4, route.color)
+        end
+    end
+end
+
 function M.build(ctx)
     ctx.buttons = {}
     ctx.screen = "home"
@@ -74,6 +111,7 @@ function M.build(ctx)
     ui.box(ctx, 910, 405, 1380, 810, vmath.vector4(0.025, 0.07, 0.12, 1))
     add_city_lights(ctx)
     add_bridge(ctx)
+    add_network_ribbon(ctx)
 
     -- Left navigation
     ui.box(ctx, 86, 450, 172, 900, vmath.vector4(0.015, 0.045, 0.078, 0.98))
@@ -83,7 +121,7 @@ function M.build(ctx)
     ui.text(ctx, 58, 653, "GARAJ", 0.98, C.muted, gui.PIVOT_W)
     ui.text(ctx, 58, 591, "MARKET", 0.98, C.muted, gui.PIVOT_W)
     ui.text(ctx, 58, 529, "AYARLAR", 0.98, C.muted, gui.PIVOT_W)
-    ui.text(ctx, 31, 34, "MHDRN STÜDYOSU  v0.3", 0.72, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 31, 34, "MHDRN STÜDYOSU  v0.5", 0.72, C.muted, gui.PIVOT_W)
 
     -- Brand and account bar
     ui.text(ctx, 220, 838, "METROVA", 3.25, C.white, gui.PIVOT_W)
