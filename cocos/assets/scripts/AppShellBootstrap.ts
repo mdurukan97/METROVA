@@ -10,7 +10,7 @@ export class AppShellBootstrap extends Component {
   private gameplayRoot!:Node;
 
   start(){
-    const ui=this.getComponent(UITransform)??this.addComponent(UITransform);
+    const ui=((this.getComponent(UITransform) ?? this.addComponent(UITransform))!)!;
     if(ui.contentSize.width<100)ui.setContentSize(1280,720);
 
     this.gameplayRoot=this.fullNode('GameplayRoot');
