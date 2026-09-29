@@ -6,6 +6,7 @@ import { NetworkModel } from './NetworkModel';
 import { BuiltLine, StationAnchor, TrainState } from './TransitTypes';
 import { PassengerSimulation } from './PassengerSimulation';
 import { NetworkMetrics } from './NetworkMetrics';
+import { ISTANBUL_GAMEPLAY_BOUNDS } from '../map/MapProjectionConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('LineBuildController')
@@ -30,7 +31,7 @@ export class LineBuildController extends Component {
     resources.load('data/istanbul-atlas',JsonAsset,(err,asset)=>{
       if(err){console.error(err);return;}
       const atlas=asset.json as any;
-      this.projector=new GeoProjector(atlas.map.bounds);
+      this.projector=new GeoProjector(ISTANBUL_GAMEPLAY_BOUNDS);
       for(const s of atlas.stations as StationAnchor[]) this.stations.set(s.id,s);
       this.model=new NetworkModel(this.stations);
       this.model.budgetM=64;
