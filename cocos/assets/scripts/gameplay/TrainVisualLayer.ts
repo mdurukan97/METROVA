@@ -29,6 +29,7 @@ export class TrainVisualLayer extends Component {
     const size=this.getComponent(UITransform)!.contentSize;
     this.g.clear();
     for(const train of model.trains){
+      if(train.queuedAtTerminal)continue;
       const line=model.lines.find((l:any)=>l.id===train.lineId);
       if(!line||!line.segments.length)continue;
       const seg=line.segments[train.segmentIndex];

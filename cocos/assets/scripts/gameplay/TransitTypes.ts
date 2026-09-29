@@ -28,4 +28,5 @@ export type TrainState = {
   capacity:number;
   passengers:number;
   onboardTargets:string[];
+  queuedAtTerminal?:boolean;
 };
