@@ -1,3 +1,4 @@
+import { fetchOverpassJson } from './overpass-fetch.mjs';
 import { writeFile } from 'node:fs/promises';
 
 const boxes=[
@@ -40,13 +41,7 @@ for(const box of boxes){
   const q=`[out:json][timeout:120];
 way["highway"~"^(motorway|motorway_link|trunk|trunk_link|primary|primary_link|secondary|secondary_link|tertiary|tertiary_link|residential|living_street)$"](${box.south},${box.west},${box.north},${box.east});
 out geom qt;`;
-  const response=await fetch('https://overpass-api.de/api/interpreter',{
-    method:'POST',
-    headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','User-Agent':'METROVA-night-atlas/0.4'},
-    body:new URLSearchParams({data:q})
-  });
-  if(!response.ok)throw new Error(`Overpass roads ${box.id} failed: ${response.status}`);
-  const json=await response.json();
+  const json=await fetchOverpassJson(q,'Road atlas '+box.id,'METROVA-night-atlas/0.5');
   for(const e of json.elements){
     const highway=e.tags?.highway;
     if(e.type!=='way'||!allowed.has(highway)||!Array.isArray(e.geometry)||e.geometry.length<2||seen.has(e.id))continue;
