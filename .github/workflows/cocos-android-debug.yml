@@ -64,6 +64,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          Remove-Item "cocos/assets/data/istanbul-atlas.json" -ErrorAction SilentlyContinue
+          Remove-Item "cocos/assets/data/istanbul-district-geometry.json" -ErrorAction SilentlyContinue
+          Remove-Item "cocos/assets/data/istanbul-night-roads.json" -ErrorAction SilentlyContinue
           gh run download 36505575216 --repo ${{ github.repository }} -n istanbul-night-atlas -D cocos/assets/data
 
       - name: Prepare runtime
