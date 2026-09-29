@@ -7,7 +7,7 @@ local BACK = hash("back")
 
 local function normalize_action(action)
     local out = {
-        x = action.x or 0,
+        x = ui.to_design_x(action.x or 0),
         y = action.y or 0,
         pressed = action.pressed or false,
         released = action.released or false,
@@ -15,7 +15,7 @@ local function normalize_action(action)
 
     if action.touch and action.touch[1] then
         local touch = action.touch[1]
-        out.x = touch.x or out.x
+        out.x = ui.to_design_x(touch.x or (out.x * ui.x_scale()))
         out.y = touch.y or out.y
         out.pressed = touch.pressed or false
         out.released = touch.released or false
