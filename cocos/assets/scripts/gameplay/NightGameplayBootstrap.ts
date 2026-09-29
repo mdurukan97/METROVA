@@ -17,6 +17,8 @@ const { ccclass } = _decorator;
 
 @ccclass('NightGameplayBootstrap')
 export class NightGameplayBootstrap extends Component {
+  @property devPendik=false;
+
   start(){
     const rootUi=this.getComponent(UITransform)??this.addComponent(UITransform);
     if(rootUi.contentSize.width<100)rootUi.setContentSize(1280,720);
@@ -71,7 +73,7 @@ export class NightGameplayBootstrap extends Component {
     const pendik=this.node.addComponent(DevPendikScenarioController)!;
     pendik.builder=builder;
     pendik.cameraDirector=director;
-    pendik.enabledOnStart=false;
+    pendik.enabledOnStart=this.devPendik;
   }
 
   private layer<T extends Component>(parent:Node,name:string,type:new()=>T):T{
