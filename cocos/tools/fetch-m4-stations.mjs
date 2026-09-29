@@ -3,7 +3,7 @@ import { writeFile } from 'node:fs/promises';
 const expected=[
   ['Kadıköy',[]],['Ayrılık Çeşmesi',[]],['Acıbadem',[]],['Ünalan',[]],['Göztepe',[]],
   ['Yenisahra',[]],['Kozyatağı',[]],['Bostancı',[]],['Küçükyalı',[]],['Maltepe',[]],
-  ['Huzurevi',[]],['Gülsuyu',[]],['Esenkent',[]],['Hastane-Adliye',['Hastane - Adliye']],
+  ['Huzurevi',[]],['Gülsuyu',[]],['Esenkent',[]],['Hastane-Adliye',['Hastane - Adliye','Hastane Adliye','Hastane–Adliye']],
   ['Soğanlık',[]],['Kartal',[]],['Yakacık-Adnan Kahveci',['Yakacık - Adnan Kahveci']],
   ['Pendik',[]],['Tavşantepe',[]],['Fevzi Çakmak-Hastane',['Fevzi Çakmak - Hastane']],
   ['Yayalar-Şeyhli',['Yayalar - Şeyhli']],['Kurtköy',[]],['Sabiha Gökçen Havalimanı',['Sabiha Gökçen']]
@@ -11,8 +11,8 @@ const expected=[
 
 const query=`[out:json][timeout:90];
 (
-  nwr["railway"="station"]["station"="subway"](40.84,28.96,41.03,29.36);
-  nwr["railway"="halt"]["subway"="yes"](40.84,28.96,41.03,29.36);
+  nwr["railway"="station"](40.84,28.96,41.03,29.36);
+  nwr["railway"="halt"](40.84,28.96,41.03,29.36);
 );
 out center tags;`;
 
@@ -31,12 +31,22 @@ const candidates=json.elements.map(e=>({
   tags:e.tags??{}
 })).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon));
 
+const score=c=>{
+  let s=0;
+  if(c.tags?.station==='subway')s+=8;
+  if(c.tags?.subway==='yes')s+=6;
+  if(/metro/i.test(String(c.tags?.network??'')))s+=5;
+  if(/metro/i.test(String(c.tags?.operator??'')))s+=3;
+  if(c.tags?.public_transport==='station')s+=3;
+  if(c.osmType==='node')s+=1;
+  return s;
+};
 const output=[];
 const missing=[];
 for(const [name,aliases] of expected){
   const names=[name,...aliases].map(normalize);
-  const matches=candidates.filter(c=>names.includes(normalize(c.name)));
-  if(matches.length!==1){missing.push({name,matches:matches.map(m=>m.name)});continue;}
+  const matches=candidates.filter(c=>names.includes(normalize(c.name))).sort((a,b)=>score(b)-score(a));
+  if(!matches.length){missing.push({name,matches:[]});continue;}
   const m=matches[0];
   output.push({name,lat:m.lat,lon:m.lon,osmType:m.osmType,osmId:m.osmId,source:'OpenStreetMap'});
 }
