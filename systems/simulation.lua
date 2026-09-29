@@ -9,6 +9,7 @@ function M.new()
         year = 2028,
         month = 4,
         passengers = 0,
+        fare = 22,
         paused = false,
         speed = 1,
         clock = 0,
@@ -31,8 +32,6 @@ function M.update(sim, dt, active_routes)
 
     local scaled = dt * sim.speed
     sim.clock = sim.clock + scaled
-    sim.passengers = sim.passengers + scaled * math.max(1, active_routes) * 0.55
-
     if sim.clock >= 15 then
         sim.clock = sim.clock - 15
         sim.month = sim.month + 1
@@ -42,6 +41,15 @@ function M.update(sim, dt, active_routes)
             sim.year = sim.year + 1
         end
     end
+end
+
+function M.record_delivery(sim, count)
+    if not count or count <= 0 then
+        return
+    end
+    sim.passengers = sim.passengers + count
+    sim.budget = sim.budget + count * sim.fare
+    sim.approval = math.min(100, sim.approval + count * 0.01)
 end
 
 return M

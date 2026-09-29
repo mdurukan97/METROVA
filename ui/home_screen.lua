@@ -121,7 +121,7 @@ function M.build(ctx)
     ui.text(ctx, 58, 653, "GARAJ", 0.98, C.muted, gui.PIVOT_W)
     ui.text(ctx, 58, 591, "MARKET", 0.98, C.muted, gui.PIVOT_W)
     ui.text(ctx, 58, 529, "AYARLAR", 0.98, C.muted, gui.PIVOT_W)
-    ui.text(ctx, 31, 34, "MHDRN STÜDYOSU  v0.5", 0.72, C.muted, gui.PIVOT_W)
+    ui.text(ctx, 31, 34, "MHDRN STÜDYOSU  v0.6", 0.72, C.muted, gui.PIVOT_W)
 
     -- Brand and account bar
     ui.text(ctx, 220, 838, "METROVA", 3.25, C.white, gui.PIVOT_W)

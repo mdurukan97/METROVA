@@ -4,6 +4,7 @@ local geom = require "core.geom"
 local istanbul = require "data.istanbul"
 local network_system = require "systems.network"
 local simulation_system = require "systems.simulation"
+local passenger_system = require "systems.passengers"
 
 local M = {}
 local C = theme.colors
@@ -219,8 +220,8 @@ local function add_hud(ctx)
     ctx.buttons.home = ui.button(ctx, 1540, 60, 90, 44, "ANA", C.panel, C.border, C.white, 0.74)
 
     ui.panel(ctx, 1365, 758, 390, 86, C.panel, C.border)
-    ui.text(ctx, 1195, 780, "YENİ YOLCU TALEBİ", 0.72, C.red, gui.PIVOT_W)
-    ui.text(ctx, 1195, 748, "Kadıköy bölgesinde yoğunluk artıyor.", 0.62, C.muted, gui.PIVOT_W)
+    ctx.alert_title = ui.text(ctx, 1195, 780, "YOLCU TALEBİ", 0.72, C.cyan, gui.PIVOT_W)
+    ctx.alert_body = ui.text(ctx, 1195, 748, "İstasyonlarda yolcu oluşmaya başladı.", 0.62, C.muted, gui.PIVOT_W)
 
     ui.panel(ctx, 345, 70, 530, 50, vmath.vector4(0.025, 0.085, 0.135, 0.92), C.border)
     ctx.hint_text = ui.text(ctx, 102, 70, "1. Bir istasyona basılı tut ve diğerine sürükle.", 0.55, C.muted, gui.PIVOT_W)
@@ -230,6 +231,10 @@ local function add_station_visual(ctx, station)
     station.glow = ui.circle(ctx, station.pos.x, station.pos.y, 34, vmath.vector4(0.12, 0.55, 1.0, 0.12))
     station.ring = ui.circle(ctx, station.pos.x, station.pos.y, 21, vmath.vector4(0.82, 0.93, 1.0, 0.95))
     station.core = ui.circle(ctx, station.pos.x, station.pos.y, 12, C.blue)
+    station.queue_bg = ui.circle(ctx, station.pos.x + 16, station.pos.y - 15, 19, C.blue)
+    station.queue_text = ui.text(ctx, station.pos.x + 16, station.pos.y - 15, "0", 0.42, C.white, gui.PIVOT_CENTER)
+    gui.set_enabled(station.queue_bg, false)
+    gui.set_enabled(station.queue_text, false)
     station.active_color = nil
 
     local offset = LABEL_OFFSETS[station.id]
@@ -284,6 +289,9 @@ local function create_route_train(ctx, route)
         t = 0,
         direction = 1,
         speed = 0.23 + (#ctx.trains % 3) * 0.025,
+        dwell = 0.60,
+        capacity = 18,
+        onboard = 0,
     }
 
     local map_parent = ctx.parent
@@ -304,6 +312,10 @@ local function create_route_train(ctx, route)
     ui.set_parent(ctx, map_parent)
     orient_train(train)
     table.insert(ctx.trains, train)
+
+    local delivered = passenger_system.serve(first, train)
+    simulation_system.record_delivery(ctx.simulation, delivered)
+    gui.set_color(train.window, C.cyan)
 end
 
 local function delete_preview(ctx)
@@ -370,32 +382,77 @@ local function finish_route(ctx)
     return true
 end
 
-local function advance_train(train, amount)
-    train.t = train.t + amount
+local function advance_train(train, dt, simulation_speed)
+    if train.dwell > 0 then
+        train.dwell = math.max(0, train.dwell - dt * simulation_speed)
+        return nil
+    end
 
-    local guard = 0
-    while train.t >= 1 and guard < 8 do
-        train.t = train.t - 1
-        train.i = train.j
+    train.t = train.t + dt * train.speed * simulation_speed
+    if train.t < 1 then
+        return nil
+    end
 
-        if train.direction == 1 then
-            if train.i >= #train.route.stops then
-                train.direction = -1
-                train.j = train.i - 1
-            else
-                train.j = train.i + 1
-            end
+    train.t = 0
+    train.i = train.j
+    local arrived = train.route.stops[train.i]
+
+    if train.direction == 1 then
+        if train.i >= #train.route.stops then
+            train.direction = -1
+            train.j = math.max(1, train.i - 1)
         else
-            if train.i <= 1 then
-                train.direction = 1
-                train.j = 2
-            else
-                train.j = train.i - 1
-            end
+            train.j = train.i + 1
         end
+    else
+        if train.i <= 1 then
+            train.direction = 1
+            train.j = math.min(#train.route.stops, 2)
+        else
+            train.j = train.i - 1
+        end
+    end
 
-        orient_train(train)
-        guard = guard + 1
+    train.dwell = 0.60
+    orient_train(train)
+    return arrived
+end
+
+local function update_station_queues(ctx)
+    for _, station in ipairs(ctx.stations) do
+        local waiting = math.floor(station.waiting or 0)
+        local visible = waiting > 0
+        gui.set_enabled(station.queue_bg, visible)
+        gui.set_enabled(station.queue_text, visible)
+
+        if visible then
+            gui.set_text(station.queue_text, tostring(math.min(99, waiting)))
+            local level = passenger_system.level(station)
+            local color = C.blue
+            if level == 2 then
+                color = C.orange
+            elseif level >= 3 then
+                color = C.red
+            end
+            gui.set_color(station.queue_bg, color)
+        end
+    end
+
+    local worst = passenger_system.worst_station(ctx.stations)
+    if worst then
+        local waiting = math.floor(worst.waiting or 0)
+        local level = passenger_system.level(worst)
+        if level >= 3 then
+            gui.set_text(ctx.alert_title, "YOĞUNLUK KRİTİK")
+            gui.set_color(ctx.alert_title, C.red)
+        elseif level == 2 then
+            gui.set_text(ctx.alert_title, "YOĞUNLUK ARTIYOR")
+            gui.set_color(ctx.alert_title, C.orange)
+        else
+            gui.set_text(ctx.alert_title, "YOLCU TALEBİ")
+            gui.set_color(ctx.alert_title, C.cyan)
+        end
+        gui.set_text(ctx.alert_body, worst.name .. ": " .. waiting .. " yolcu bekliyor.")
     end
 end
 
@@ -433,29 +490,38 @@ end
 
 local function update_hud(ctx)
     local connected = network_system.connected_count(ctx.network)
-    if connected >= 5 then
-        gui.set_text(ctx.goal_text, "HEDEF TAMAMLANDI  " .. connected .. "/5")
-        gui.set_color(ctx.goal_text, C.green)
-        gui.set_text(ctx.hint_text, "Harika. İstanbul'daki ilk metro hattın çalışıyor.")
-        show_completion(ctx, connected)
-    else
+    local sim = ctx.simulation
+    local passenger_goal = 25
+
+    if connected < 5 then
         gui.set_text(ctx.goal_text, "5 istasyonu bağla  " .. connected .. "/5")
         gui.set_color(ctx.goal_text, C.white)
 
         if #ctx.routes == 0 then
             gui.set_text(ctx.hint_text, "1. Bir istasyona basılı tut ve diğerine sürükle.")
         elseif connected < 3 then
-            gui.set_text(ctx.hint_text, "2. Yeni hat çiz veya aynı sürüklemede birkaç durağı bağla.")
+            gui.set_text(ctx.hint_text, "2. Aynı sürüklemede birkaç istasyonun üzerinden geçebilirsin.")
         else
-            gui.set_text(ctx.hint_text, "3. Hedef için " .. math.max(0, 5 - connected) .. " istasyon daha bağla.")
+            gui.set_text(ctx.hint_text, "3. Ağ için " .. math.max(0, 5 - connected) .. " istasyon daha bağla.")
         end
+    elseif sim.passengers < passenger_goal then
+        gui.set_text(ctx.goal_text, "25 yolcu taşı  " .. math.min(passenger_goal, math.floor(sim.passengers)) .. "/25")
+        gui.set_color(ctx.goal_text, C.cyan)
+        gui.set_text(ctx.hint_text, "Trenler durakta bekler, yolcu alır ve bir sonraki durakta indirir.")
+    else
+        gui.set_text(ctx.goal_text, "HEDEF TAMAMLANDI")
+        gui.set_color(ctx.goal_text, C.green)
+        gui.set_text(ctx.hint_text, "Harika. İstanbul'daki ilk hattın yolcu taşımaya başladı.")
+        show_completion(ctx, connected)
     end
 
-    local sim = ctx.simulation
+    local waiting = math.floor(passenger_system.total_waiting(ctx.stations))
     gui.set_text(ctx.budget_text, "TL  " .. format_int(sim.budget))
-    gui.set_text(ctx.passenger_text, "Yolcu " .. format_int(sim.passengers))
-    gui.set_text(ctx.route_text, "Hat " .. tostring(#ctx.routes))
+    gui.set_text(ctx.approval_text, string.format("Memnuniyet %d", math.floor(sim.approval)))
+    gui.set_text(ctx.passenger_text, "Taşınan " .. format_int(sim.passengers))
+    gui.set_text(ctx.route_text, "Hat " .. tostring(#ctx.routes) .. " / Bekleyen " .. waiting)
     gui.set_text(ctx.date_text, string.format("%d / %02d", sim.year, sim.month))
+    update_station_queues(ctx)
 end
 
 function M.build(ctx)
@@ -498,6 +564,7 @@ function M.build(ctx)
         ctx.station_index[station.id] = station
         add_station_visual(ctx, station)
     end
+    passenger_system.attach(ctx.stations)
 
     ui.set_parent(ctx, nil)
     add_hud(ctx)
@@ -511,19 +578,37 @@ function M.update(ctx, dt)
     simulation_system.update(ctx.simulation, dt, #ctx.network.edges)
     ctx.anim_clock = ctx.anim_clock + dt
 
+    if not ctx.simulation.paused then
+        passenger_system.update(ctx.stations, dt, ctx.simulation.speed)
+    end
+
     for index, station in ipairs(ctx.stations) do
-        local pulse = 1.0 + 0.10 * math.sin(ctx.anim_clock * 2.5 + index * 0.55)
+        local demand = math.min(1, (station.waiting or 0) / math.max(1, station.capacity or 22))
+        local pulse = 1.0 + (0.08 + demand * 0.18) * math.sin(ctx.anim_clock * (2.2 + demand * 2.0) + index * 0.55)
         gui.set_scale(station.glow, vmath.vector3(pulse, pulse, 1))
-        if station.active_color then
+
+        if demand >= 0.72 then
+            gui.set_color(station.glow, vmath.vector4(C.red.x, C.red.y, C.red.z, 0.20))
+        elseif demand >= 0.40 then
+            gui.set_color(station.glow, vmath.vector4(C.orange.x, C.orange.y, C.orange.z, 0.17))
+        elseif station.active_color then
             local color = station.active_color
-            gui.set_color(station.glow, vmath.vector4(color.x, color.y, color.z, 0.16 + 0.06 * (pulse - 0.9)))
+            gui.set_color(station.glow, vmath.vector4(color.x, color.y, color.z, 0.15))
         end
     end
 
     if not ctx.simulation.paused then
         local speed = ctx.simulation.speed
         for _, train in ipairs(ctx.trains) do
-            advance_train(train, dt * train.speed * speed)
+            local arrived = advance_train(train, dt, speed)
+            if arrived then
+                local delivered, boarded = passenger_system.serve(arrived, train)
+                simulation_system.record_delivery(ctx.simulation, delivered)
+                gui.set_color(train.window, C.cyan)
+            elseif train.dwell <= 0 then
+                gui.set_color(train.window, vmath.vector4(0.035, 0.16, 0.24, 0.98))
+            end
+
             local a = train.route.stops[train.i]
             local b = train.route.stops[train.j]
             local pos = geom.lerp(a.pos, b.pos, train.t)
