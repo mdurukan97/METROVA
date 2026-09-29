@@ -39,15 +39,28 @@ local function add_city_texture(ctx)
     end
 end
 
+local function rounded_water_segment(ctx, a, b, width)
+    local distance = geom.distance(a, b)
+    local steps = math.max(2, math.ceil(distance / math.max(18, width * 0.26)))
+    for i = 0, steps do
+        local p = geom.lerp(a, b, i / steps)
+        ui.circle(ctx, p.x, p.y, width + 26, C.water_glow)
+        ui.circle(ctx, p.x, p.y, width, C.water)
+    end
+end
+
 local function add_water(ctx)
+    -- Continuous rounded Bosphorus instead of disconnected rotated rectangles.
     for _, seg in ipairs(istanbul.water_segments) do
-        ui.line(ctx, seg.a, seg.b, seg.width + 28, C.water_glow)
-        ui.line(ctx, seg.a, seg.b, seg.width, C.water)
+        rounded_water_segment(ctx, seg.a, seg.b, seg.width)
     end
     for _, seg in ipairs(istanbul.halic_segments) do
-        ui.line(ctx, seg.a, seg.b, seg.width + 18, C.water_glow)
-        ui.line(ctx, seg.a, seg.b, seg.width, C.water)
+        rounded_water_segment(ctx, seg.a, seg.b, seg.width)
     end
+
+    -- Two restrained bridge hints give the channel recognisable Istanbul structure.
+    ui.neon_line(ctx, vmath.vector3(825, 565, 0), vmath.vector3(1015, 540, 0), 3.2, C.red, vmath.vector4(1, 0.08, 0.12, 0.12))
+    ui.neon_line(ctx, vmath.vector3(830, 665, 0), vmath.vector3(1010, 640, 0), 2.5, C.blue, vmath.vector4(0.12, 0.48, 1, 0.10))
 end
 
 local function add_hud(ctx)
