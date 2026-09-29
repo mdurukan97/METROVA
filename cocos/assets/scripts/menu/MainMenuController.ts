@@ -18,7 +18,7 @@ export class MainMenuController extends Component {
     this.makeLabel('Subtitle',-535,186,500,42,'ŞEHRİN NABZINI RAYLARLA YÖNET',16,new Color('#A7BBC8'));
 
     const continueButton=this.heroButton(-405,92,330,76,'DEVAM ET','İstanbul · IST-01');
-    continueButton.node.on(Node.EventType.CLICK,()=>this.node.emit('metrova:continue'));
+    continueButton.node.on(Button.EventType.CLICK,()=>this.node.emit('metrova:continue'));
 
     this.makeLabel('Section',-535,-5,420,28,'KARİYER MERKEZİ',12,new Color('#708A9B'));
     this.cards.push(this.menuCard(-430,-105,205,145,'KARİYER','Şehirler ve bölümler','▰','metrova:career'));
@@ -50,7 +50,7 @@ export class MainMenuController extends Component {
   private menuCard(x:number,y:number,w:number,h:number,title:string,sub:string,icon:string,event:string){
     const n=this.glassPanel(x,y,w,h,18,new Color(5,18,29,232),new Color(41,77,101,205));
     const b=n.addComponent(Button)!;b.transition=Button.Transition.SCALE;b.zoomScale=0.965;
-    n.on(Node.EventType.CLICK,()=>this.node.emit(event));
+    n.on(Button.EventType.CLICK,()=>this.node.emit(event));
     const badge=this.glassPanel(0,35,46,46,13,new Color(12,48,72,245),new Color(62,117,151,200),n);
     this.makeChildLabel(badge,-23,0,46,34,icon,20,new Color('#7FC7F5'),Label.HorizontalAlign.CENTER);
     this.makeChildLabel(n,-w/2+18,-8,w-36,26,title,16,new Color('#FFFFFF'));
@@ -68,7 +68,7 @@ export class MainMenuController extends Component {
     const n=this.glassPanel(x,y,48,48,15,new Color(5,18,29,235),new Color(41,77,101,205));
     const b=n.addComponent(Button)!;b.transition=Button.Transition.SCALE;b.zoomScale=0.92;
     this.makeChildLabel(n,-24,0,48,32,text,19,new Color('#DCE9F0'),Label.HorizontalAlign.CENTER);
-    n.on(Node.EventType.CLICK,()=>this.node.emit(event));
+    n.on(Button.EventType.CLICK,()=>this.node.emit(event));
   }
 
   private enterAnimation(hero:Node){
