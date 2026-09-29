@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "vehicles": [
+    {"id":"M-100","displayName":"Kent","vehicleClass":"urban","access":{"type":"starter","priceCoin":0},"stats":{"capacity":36,"speed":1.00,"acceleration":1.00,"dwell":1.00,"maintenance":1.00},"role":"balanced"},
+    {"id":"M-110","displayName":"Çevik","vehicleClass":"urban","access":{"type":"starter","priceCoin":0},"stats":{"capacity":28,"speed":1.04,"acceleration":1.32,"dwell":0.80,"maintenance":0.92},"role":"frequent-stop"},
+    {"id":"M-120","displayName":"Yük","vehicleClass":"urban","access":{"type":"starter","priceCoin":0},"stats":{"capacity":48,"speed":0.88,"acceleration":0.78,"dwell":1.08,"maintenance":1.12},"role":"capacity-slow"},
+    {"id":"M-130","displayName":"Eko","vehicleClass":"urban","access":{"type":"level","key":"IST-05","priceCoin":750},"stats":{"capacity":34,"speed":0.94,"acceleration":0.95,"dwell":1.00,"maintenance":0.74},"role":"economy"},
+    {"id":"M-140","displayName":"Shuttle","vehicleClass":"urban","access":{"type":"level","key":"IST-08","priceCoin":1050},"stats":{"capacity":26,"speed":1.14,"acceleration":1.42,"dwell":0.69,"maintenance":1.04},"role":"turnaround"},
+    {"id":"M-150","displayName":"Metropol","vehicleClass":"urban","access":{"type":"level","key":"IST-10","priceCoin":1600},"stats":{"capacity":50,"speed":0.96,"acceleration":1.00,"dwell":0.92,"maintenance":1.22},"role":"dense-center"},
+    {"id":"M-160","displayName":"Banliyö","vehicleClass":"urban","access":{"type":"level","key":"IST-13","priceCoin":2150},"stats":{"capacity":54,"speed":1.08,"acceleration":0.75,"dwell":1.12,"maintenance":1.22},"role":"suburban"},
+    {"id":"M-170","displayName":"Ekspres","vehicleClass":"urban","access":{"type":"level","key":"IST-15","priceCoin":2400},"stats":{"capacity":32,"speed":1.42,"acceleration":0.86,"dwell":1.00,"maintenance":1.27},"role":"long-express"},
+    {"id":"M-180","displayName":"Tasarruf","vehicleClass":"urban","access":{"type":"level","key":"IST-18","priceCoin":2700},"stats":{"capacity":40,"speed":0.90,"acceleration":0.88,"dwell":1.05,"maintenance":0.78},"role":"low-running-cost"},
+    {"id":"M-190","displayName":"Mega","vehicleClass":"urban","access":{"type":"level","key":"IST-20","priceCoin":3800},"stats":{"capacity":68,"speed":0.82,"acceleration":0.62,"dwell":1.22,"maintenance":1.50},"role":"heavy-capacity"},
+    {"id":"C-200","displayName":"Koridor","vehicleClass":"intercity","access":{"type":"special-operation","key":"INTERCITY-CORRIDOR","priceCoin":0},"stats":{"capacity":72,"speed":1.38,"acceleration":0.85,"dwell":1.15,"maintenance":1.55},"role":"intercity-capacity"},
+    {"id":"C-210","displayName":"Hızlı","vehicleClass":"intercity","access":{"type":"special-operation","key":"INTERCITY-EXPRESS","priceCoin":0},"stats":{"capacity":48,"speed":1.55,"acceleration":1.00,"dwell":1.00,"maintenance":1.70},"role":"intercity-speed"}
+  ]
+}
