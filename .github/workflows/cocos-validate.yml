@@ -19,21 +19,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: cocos/package.json
       - name: Install tooling
         run: npm install
-      - name: Fetch official Istanbul district geometry
-        run: npm run atlas:fetch
-      - name: Validate station/district geography
-        run: npm run atlas:validate
+      - name: Build verified offline Istanbul night atlas
+        run: npm run atlas:night
       - name: Type-check TypeScript
         run: npx tsc --noEmit
       - name: Verify atlas integrity
         run: |
-          node -e "const fs=require('fs');const g=JSON.parse(fs.readFileSync('assets/data/istanbul-district-geometry.json','utf8')); if(g.features.length!==39) throw new Error('District count '+g.features.length); console.log('District polygons:',g.features.length)"
+          node -e "const fs=require('fs');const g=JSON.parse(fs.readFileSync('assets/data/istanbul-district-geometry.json','utf8'));const a=JSON.parse(fs.readFileSync('assets/data/istanbul-atlas.json','utf8'));const m4=a.stations.filter(s=>s.officialLines&&s.officialLines.includes('M4'));if(g.features.length!==39)throw new Error('District count '+g.features.length);if(m4.length!==23)throw new Error('M4 station count '+m4.length);if(!m4.some(s=>s.name==='Pendik'&&s.coordinateStatus==='verified'))throw new Error('Pendik is not verified');console.log('Districts:',g.features.length,'M4:',m4.length,'Pendik: verified')"
       - uses: actions/upload-artifact@v4
         with:
-          name: istanbul-official-atlas
-          path: cocos/assets/data/istanbul-district-geometry.json
+          name: istanbul-night-atlas
+          path: |
+            cocos/assets/data/istanbul-district-geometry.json
+            cocos/assets/data/istanbul-night-roads.json
+            cocos/assets/data/m4-stations-verified.json
+            cocos/assets/data/istanbul-atlas.json
           retention-days: 14
