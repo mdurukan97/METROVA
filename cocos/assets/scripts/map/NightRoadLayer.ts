@@ -15,7 +15,7 @@ export class NightRoadLayer extends Component {
   private lastLod=-1;
 
   start(){
-    this.graphics=this.getComponent(Graphics)??this.addComponent(Graphics);
+    this.graphics=(this.getComponent(Graphics)??this.addComponent(Graphics))!;
     resources.load('data/istanbul-night-roads',JsonAsset,(err,asset)=>{
       if(err){console.error('[METROVA] night road atlas missing. Run npm run atlas:roads.',err);return;}
       const data=asset.json as RoadAsset;
