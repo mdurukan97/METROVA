@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "cosmetics": [
+    {"id":"skin-amber-comet","displayName":"Amber Comet","slot":"train-skin"},
+    {"id":"theme-night-lines","displayName":"Gece Hatları","slot":"line-theme"},
+    {"id":"symbols-istanbul","displayName":"İstanbul Sembolleri","slot":"station-symbols"},
+    {"id":"map-cinematic-night","displayName":"Sinematik Gece","slot":"map-theme"},
+    {"id":"audio-modern-doors","displayName":"Modern Kapılar","slot":"audio-pack"},
+    {"id":"badge-supporter","displayName":"Destekçi Rozeti","slot":"profile-badge"}
+  ],
+  "products": [
+    {"id":"coin-amber-comet","displayName":"Amber Comet","kind":"coin-cosmetic","coinPrice":300,"grants":[{"type":"cosmetic","id":"skin-amber-comet","slot":"train-skin"}]},
+    {"id":"coin-night-lines","displayName":"Gece Hatları","kind":"coin-cosmetic","coinPrice":450,"grants":[{"type":"cosmetic","id":"theme-night-lines","slot":"line-theme"}]},
+    {"id":"coin-modern-doors","displayName":"Modern Kapılar","kind":"coin-cosmetic","coinPrice":350,"grants":[{"type":"cosmetic","id":"audio-modern-doors","slot":"audio-pack"}]},
+    {"id":"paid-night-cities","displayName":"Gece Şehirleri Paketi","kind":"paid-cosmetic","playProductId":"metrova.cosmetic.night_cities","grants":[{"type":"cosmetic","id":"map-cinematic-night","slot":"map-theme"},{"type":"cosmetic","id":"symbols-istanbul","slot":"station-symbols"}]},
+    {"id":"remove-ads","displayName":"Reklamları Kaldır","kind":"remove-ads","playProductId":"metrova.remove_ads","grants":[{"type":"entitlement","id":"remove-ads"}]},
+    {"id":"supporter-pack","displayName":"Destekçi Paketi","kind":"supporter-pack","playProductId":"metrova.supporter_pack","grants":[{"type":"entitlement","id":"remove-ads"},{"type":"entitlement","id":"supporter"},{"type":"cosmetic","id":"badge-supporter","slot":"profile-badge"}]}
+  ],
+  "rewardedActions": [
+    {"id":"store-refresh","placement":"store","reward":{"type":"store-refresh","amount":1}},
+    {"id":"preview-amber-comet","placement":"store","reward":{"type":"cosmetic-preview","cosmeticId":"skin-amber-comet","durationSeconds":90}}
+  ]
+}
