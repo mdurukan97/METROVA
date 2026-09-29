@@ -1,5 +1,5 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import * as assert from 'node:assert/strict';
 import { NetworkModel } from '../assets/scripts/gameplay/NetworkModel';
 import { PassengerSimulation } from '../assets/scripts/gameplay/PassengerSimulation';
 import { LevelObjectiveController } from '../assets/scripts/gameplay/LevelObjectiveController';
