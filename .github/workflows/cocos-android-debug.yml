@@ -1,0 +1,113 @@
+name: Cocos Android Debug APK
+
+on:
+  workflow_run:
+    workflows: ["Validate Cocos Rewrite"]
+    types: [completed]
+    branches: [cocos-rewrite]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-cocos-rewrite
+  cancel-in-progress: true
+
+jobs:
+  android-debug:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android 35 and NDK
+        shell: pwsh
+        run: |
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;28.0.13004108" "cmake;3.22.1"
+          $ndk=Join-Path $env:ANDROID_SDK_ROOT "ndk\28.0.13004108"
+          "ANDROID_NDK_HOME=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "NDK_ROOT=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Download validated Istanbul atlas
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: istanbul-night-atlas
+          path: cocos/assets/data
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Prepare runtime
+        shell: pwsh
+        working-directory: cocos
+        run: |
+          npm install
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            npm run runtime:prepare
+          } else {
+            npm run runtime:sync
+          }
+          npm run runtime:validate
+          npx tsc --noEmit
+          npm test
+
+      - name: Build pinned Cocos CLI
+        shell: pwsh
+        run: |
+          git clone --filter=blob:none https://github.com/cocos/cocos-cli.git "$env:RUNNER_TEMP/cocos-cli"
+          Set-Location "$env:RUNNER_TEMP/cocos-cli"
+          git checkout 4aeaf59a7d7694a69e753ed7d2c649d98eb18134
+          npm install -g node-gyp
+          npm run init
+          npm install
+          npm run download-tools
+          npm run build
+
+      - name: Import Cocos project
+        shell: pwsh
+        run: |
+          $cli="$env:RUNNER_TEMP/cocos-cli/dist/cli.js"
+          node $cli --no-interactive import --project "$env:GITHUB_WORKSPACE/cocos"
+
+      - name: Build Android native project
+        shell: pwsh
+        run: |
+          $cli="$env:RUNNER_TEMP/cocos-cli/dist/cli.js"
+          $project="$env:GITHUB_WORKSPACE/cocos"
+          node $cli --no-interactive build --project $project --platform android --sdkPath "$env:ANDROID_SDK_ROOT" --ndkPath "$env:ANDROID_NDK_HOME"
+          if (!(Test-Path "$project/build/metrova-android")) {
+            throw "Expected Cocos Android build directory was not created."
+          }
+
+      - name: Compile debug APK
+        shell: pwsh
+        run: |
+          $cli="$env:RUNNER_TEMP/cocos-cli/dist/cli.js"
+          $dest="$env:GITHUB_WORKSPACE/cocos/build/metrova-android"
+          node $cli --no-interactive make --platform android --dest $dest
+          $apks=Get-ChildItem -Path $dest -Recurse -Filter *.apk
+          if (!$apks) { throw "Cocos native make completed without producing an APK." }
+          New-Item -ItemType Directory -Force "$env:GITHUB_WORKSPACE/apk-out" | Out-Null
+          $apk=$apks | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          Copy-Item $apk.FullName "$env:GITHUB_WORKSPACE/apk-out/METROVA-debug.apk"
+          Write-Host "APK: $($apk.FullName) / $($apk.Length) bytes"
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: METROVA-Android-Debug
+          path: apk-out/METROVA-debug.apk
+          if-no-files-found: error
+          retention-days: 14
