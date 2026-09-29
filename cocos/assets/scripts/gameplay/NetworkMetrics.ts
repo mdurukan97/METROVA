@@ -7,7 +7,7 @@ export class NetworkMetrics {
   constructor(private network:NetworkModel,private passengers:PassengerSimulation){}
 
   snapshot(){
-    const transferCount=0;
+    const transferCount=this.passengers.transfersCompleted;
     return {
       budgetM:this.network.budgetM,
       delivered:this.passengers.delivered,

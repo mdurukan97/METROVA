@@ -44,7 +44,8 @@ export class LineBuildController extends Component {
       this.passengers=new PassengerSimulation(this.stations.values());
       this.metrics=new NetworkMetrics(this.model,this.passengers);
       this.activeStationIds=['yenikapi','taksim','mecidiyekoy','gayrettepe','uskudar','altunizade'];
-      this.model.onTrainArrive=(train,line,stationId)=>this.onTrainArrive(train,line,stationId);
+      this.model.onTrainArrive=(train,line,stationId,nextStationId)=>
+        this.onTrainArrive(train,line,stationId,nextStationId);
       this.redraw();
     });
     this.node.on(Node.EventType.TOUCH_START,this.onStart,this);
@@ -190,16 +191,13 @@ export class LineBuildController extends Component {
     return this.metrics?.snapshot() ?? null;
   }
 
-  private onTrainArrive(train:TrainState,line:BuiltLine,stationId:string){
+  private onTrainArrive(train:TrainState,line:BuiltLine,stationId:string,nextStationId:string){
     if(!this.passengers)return;
-    const remaining=this.passengers.deliver(
-      train.onboardTargets.map((target,index)=>({id:index,origin:'',target,waitSeconds:0})),
-      stationId
+    const onboard=this.passengers.handleTrainArrival(
+      train,line,stationId,nextStationId,this.model.lines
     );
-    train.onboardTargets=remaining.map(p=>p.target);
-    const boarded=this.passengers.boardAt(stationId,line,train.capacity-train.onboardTargets.length);
-    train.onboardTargets.push(...boarded.map(p=>p.target));
-    train.passengers=train.onboardTargets.length;
+    train.onboardTargets=onboard.map(passenger=>passenger.target);
+    train.passengers=onboard.length;
   }
 
   private redraw(){
