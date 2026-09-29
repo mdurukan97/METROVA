@@ -10,7 +10,7 @@ export class MenuNetworkBackground extends Component {
   private routes:Route[]=[];
 
   start(){
-    this.g=this.getComponent(Graphics)??this.addComponent(Graphics);
+    this.g=(this.getComponent(Graphics)??this.addComponent(Graphics))!;
     this.routes=[
       {color:new Color(225,77,62,205),speed:0.032,phase:0.06,points:[new Vec2(-700,-170),new Vec2(-430,-40),new Vec2(-210,20),new Vec2(30,10),new Vec2(280,125),new Vec2(690,180)]},
       {color:new Color(42,128,201,205),speed:0.026,phase:0.42,points:[new Vec2(-650,210),new Vec2(-410,135),new Vec2(-190,35),new Vec2(15,-45),new Vec2(250,-90),new Vec2(650,-225)]},
