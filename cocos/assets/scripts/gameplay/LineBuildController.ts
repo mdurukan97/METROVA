@@ -95,6 +95,23 @@ export class LineBuildController extends Component {
 
   isBuildingLine(){return this.dragFrom!==null;}
 
+  getSelectedLineSummary(){
+    if(!this.selectedLineId)return null;
+    const line=this.model?.lines.find(l=>l.id===this.selectedLineId);
+    if(!line)return null;
+    const distanceKm=line.segments.reduce((s,x)=>s+x.distanceKm,0);
+    const tunnelKm=line.segments.filter(x=>x.tunnel).reduce((s,x)=>s+x.distanceKm,0);
+    const buildCostM=line.segments.reduce((s,x)=>s+x.costM,0);
+    return {
+      id:line.id,
+      stationNames:line.stations.map(id=>this.stations.get(id)?.name??id),
+      distanceKm,
+      tunnelKm,
+      buildCostM,
+      trainCount:this.model.trains.filter(t=>t.lineId===line.id).length
+    };
+  }
+
   getMetrics(){
     return this.metrics?.snapshot() ?? null;
   }
