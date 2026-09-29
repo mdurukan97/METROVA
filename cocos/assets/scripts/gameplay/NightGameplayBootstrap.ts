@@ -13,7 +13,7 @@ import { NightHudBuilder } from './NightHudBuilder';
 import { RouteCameraDirector } from './RouteCameraDirector';
 import { LevelRuntimeController } from './LevelRuntimeController';
 import { DevPendikScenarioController } from './DevPendikScenarioController';
-const { ccclass } = _decorator;
+const { ccclass, property } = _decorator;
 
 @ccclass('NightGameplayBootstrap')
 export class NightGameplayBootstrap extends Component {
