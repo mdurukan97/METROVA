@@ -3,6 +3,7 @@ local geom = require "core.geom"
 local M = {}
 
 local DESIGN_W = 1600
+local DESIGN_H = 900
 local OUTPUT_W = 1980
 local SX = OUTPUT_W / DESIGN_W
 local FONT_SCALE = 0.34
@@ -13,6 +14,9 @@ end
 
 local function register(ctx, node)
     table.insert(ctx.nodes, node)
+    if ctx.parent then
+        gui.set_parent(node, ctx.parent, true)
+    end
     return node
 end
 
@@ -28,6 +32,18 @@ function M.set_position(node, p)
     gui.set_position(node, vmath.vector3(tx(p.x), p.y, p.z or 0))
 end
 
+function M.set_map_position(node, p)
+    gui.set_position(node, vmath.vector3(
+        tx(p.x) - tx(DESIGN_W * 0.5),
+        p.y - DESIGN_H * 0.5,
+        p.z or 0
+    ))
+end
+
+function M.set_parent(ctx, parent)
+    ctx.parent = parent
+end
+
 function M.design_angle(a, b)
     return geom.atan2(b.y - a.y, (b.x - a.x) * SX)
 end
@@ -41,6 +57,7 @@ function M.clear(ctx)
         pcall(gui.delete_node, ctx.nodes[i])
     end
     ctx.nodes = {}
+    ctx.parent = nil
 end
 
 function M.remove(ctx, node)
