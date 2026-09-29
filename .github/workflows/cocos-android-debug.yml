@@ -34,13 +34,18 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Install Android 35 and NDK
+      - name: Install Cocos-compatible Android NDK
         shell: pwsh
         run: |
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;28.0.13004108" "cmake;3.22.1"
-          $ndk=Join-Path $env:ANDROID_SDK_ROOT "ndk\28.0.13004108"
+          $sdkmanager=(Get-Command sdkmanager.bat -ErrorAction SilentlyContinue).Source
+          if (!$sdkmanager) {
+            $sdkmanager=Get-ChildItem "$env:ANDROID_SDK_ROOT\cmdline-tools" -Recurse -Filter sdkmanager.bat | Select-Object -First 1 -ExpandProperty FullName
+          }
+          if (!$sdkmanager) { throw "sdkmanager.bat not found in the GitHub Windows Android SDK." }
+          & $sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;23.2.8568313"
+          if ($LASTEXITCODE -ne 0) { throw "sdkmanager failed with exit code $LASTEXITCODE" }
+          $ndk=Join-Path $env:ANDROID_SDK_ROOT "ndk\23.2.8568313"
+          if (!(Test-Path $ndk)) { throw "Android NDK r23c was not installed at $ndk" }
           "ANDROID_NDK_HOME=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "NDK_ROOT=$ndk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
