@@ -20,7 +20,7 @@ export class IstanbulDistrictLayer extends Component {
   private projector = new GeoProjector(ISTANBUL_GAMEPLAY_BOUNDS);
 
   start() {
-    this.graphics = this.getComponent(Graphics) ?? this.addComponent(Graphics);
+    this.graphics = (this.getComponent(Graphics) ?? this.addComponent(Graphics))!;
     resources.load('data/istanbul-district-geometry', JsonAsset, (err, asset) => {
       if (err) {
         console.error('[METROVA] Official Istanbul district geometry is missing. Run npm run atlas:fetch.', err);
