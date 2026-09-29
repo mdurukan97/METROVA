@@ -25,8 +25,8 @@ export class NetworkModel {
   snapshot():NetworkSnapshot{
     return {
       budgetM:this.budgetM,
-      lines:structuredClone(this.lines),
-      trains:structuredClone(this.trains),
+      lines:this.clone(this.lines),
+      trains:this.clone(this.trains),
       lineSeq:this.lineSeq,
       segmentSeq:this.segmentSeq,
       trainSeq:this.trainSeq
@@ -35,8 +35,8 @@ export class NetworkModel {
 
   restore(snapshot:NetworkSnapshot){
     this.budgetM=snapshot.budgetM;
-    this.lines.splice(0,this.lines.length,...structuredClone(snapshot.lines));
-    this.trains.splice(0,this.trains.length,...structuredClone(snapshot.trains));
+    this.lines.splice(0,this.lines.length,...this.clone(snapshot.lines));
+    this.trains.splice(0,this.trains.length,...this.clone(snapshot.trains));
     this.lineSeq=snapshot.lineSeq;
     this.segmentSeq=snapshot.segmentSeq;
     this.trainSeq=snapshot.trainSeq;
@@ -111,6 +111,8 @@ export class NetworkModel {
       }
     }
   }
+
+  private clone<T>(value:T):T{return JSON.parse(JSON.stringify(value)) as T;}
 
   private requireStation(id:string){
     const s=this.stations.get(id);
